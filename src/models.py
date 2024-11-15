@@ -28,9 +28,9 @@ class Product(Base):
     )
 
     categories: Mapped[list["Category"]] = relationship(
-        secondary="category_product_m2m",
-        back_populates="categories"
+        secondary="category_product_m2m", back_populates="categories"
     )
+
 
 class Category(Base):
     __tablename__ = "category"
@@ -39,18 +39,14 @@ class Category(Base):
     description: Mapped[str255]
 
     products: Mapped[list["Product"]] = relationship(
-        secondary="category_product_m2m",
-        back_populates="products"
+        secondary="category_product_m2m", back_populates="products"
     )
+
 
 class CategoryProductM2M(Base):
     __tablename__ = "category_product_m2m"
 
-    product_id: Mapped[int] = mapped_column(
-        ForeignKey("product.id"),
-        primary_key=True
-    )
+    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), primary_key=True)
     category_id: Mapped[int] = mapped_column(
-        ForeignKey("category.id"),
-        primary_key=True
+        ForeignKey("category.id"), primary_key=True
     )

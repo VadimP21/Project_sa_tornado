@@ -14,11 +14,11 @@ def make_app():
             (r"/", MainHandler),
             (r"/product/list", GetProductListHandler),
             (r"/product/([^/]+)", GetProductHandler),
-            (r"/product/", CreateProductHandler),
+            (r"/product", CreateProductHandler),
             (r"/product/update/([^/]+)", UpdateProductHandler),
             (r"/category/list", GetCategoryListHandler),
             (r"/category/([^/]+)", GetCategoryHandler),
-            (r"/category/", CreateCategoryHandler),
+            (r"/category", CreateCategoryHandler),
             (r"/category/update/([^/]+)", UpdateCategoryHandler),
             (r"/category/delete/([^/]+)", DeleteCategoryHandler),
         ]

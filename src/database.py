@@ -15,7 +15,7 @@ db_url = f"{getenv('DB_ENGINE')}://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{
 engine - синхронный движок
 async_engine - асинхронный движок
 """
-engine = create_engine(url=db_url)
+engine = create_engine(url=db_url, echo=True)
 
 async_engine = create_async_engine(url=db_url)
 

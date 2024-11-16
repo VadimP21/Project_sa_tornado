@@ -3,6 +3,7 @@
 """
 
 from tornado.web import RequestHandler
+from src.queries.orm import SyncORM
 
 
 class MainHandler(RequestHandler):
@@ -30,7 +31,15 @@ class CreateProductHandler(RequestHandler):
     """
 
     def post(self) -> None:
-        pass
+        name = self.get_argument("name")
+        price = self.get_argument("price")
+        try:
+            new_product_params = SyncORM.create_product(name=name, price=int(price))
+            self.set_status(201)
+            self.write(new_product_params)
+        except Exception as exc:
+            self.set_status(500)
+            self.write({"error": str(exc)})
 
 
 class GetProductHandler(RequestHandler):

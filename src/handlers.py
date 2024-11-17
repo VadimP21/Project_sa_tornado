@@ -84,7 +84,15 @@ class CreateCategoryHandler(RequestHandler):
     """
 
     def post(self) -> None:
-        pass
+        name = self.get_argument("name")
+        description = self.get_argument("description")
+        try:
+            new_product_params = SyncORM.create_category(name=name, description=description)
+            self.set_status(201)
+            self.write(new_product_params)
+        except Exception as exc:
+            self.set_status(500)
+            self.write({"error": str(exc)})
 
 
 class GetCategoryHandler(RequestHandler):

@@ -61,12 +61,12 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str, price: int):
+    def create_product(name: str, price: int) -> dict[str:str | int]:
         """
         Добавляет в БД новый продукт или новую версию существующего
-        :param name:
-        :param price:
-        :return:
+        :param name: имя продукта
+        :param price: стоимость продукта
+        :return: dict
         """
         with session_factory() as session:
             last_version_product_by_name = (
@@ -83,10 +83,13 @@ class SyncORM:
                     last_version_product_by_name.categories
                 )
                 new_product.categories.extend(existing_product_categories)
+                already_existing = 1
             else:
                 new_product = ProductOrm(name=name, price=price)
+                already_existing = 0
             session.add(new_product)
             new_product_params = {
+                "already_existing": already_existing,
                 "id": new_product.id,
                 "name": new_product.name,
                 "price": new_product.price,
@@ -94,3 +97,36 @@ class SyncORM:
             }
             session.commit()
             return new_product_params
+
+    @staticmethod
+    def create_category(name: str, description: str | None) -> dict[str:str | int]:
+        """
+        Добавляет в БД новый продукт или новую версию существующего
+        :param name: имя категории
+        :param description: описание категории
+        :return: dict
+        """
+        with session_factory() as session:
+            existing_category_by_name = (
+                session.query(CategoryOrm)
+                .filter_by(name=name)
+                .first()
+            )
+            print(existing_category_by_name)
+            if existing_category_by_name:
+                new_category_params = {
+                    "already_existing": 1,
+                    "id": existing_category_by_name.id,
+                    "name": existing_category_by_name.name,
+                    "description": existing_category_by_name.description,
+                }
+            else:
+                new_category = CategoryOrm(name=name, description=description)
+                new_category_params = {
+                    "already_existing": 0,
+                    "id": new_category.id,
+                    "name": new_category.name,
+                    "description": new_category.description,
+                }
+            session.commit()
+            return new_category_params

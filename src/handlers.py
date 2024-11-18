@@ -1,5 +1,5 @@
 """
-Хендлеры
+Обработчики
 """
 
 from tornado.web import RequestHandler, MissingArgumentError
@@ -16,6 +16,13 @@ class BaseHandler(RequestHandler):
             result = func(*args, **kwargs)
             self.set_status(201)
             self.write(result)
+
+        except ValueError as exc:
+            self.set_status(400)
+            self.write({"ValueError": str(exc)})
+        except AttributeError as exc:
+            self.set_status(400)
+            self.write({"AttributeError": str(exc)})
         except MissingArgumentError as exc:
             self.set_status(400)
             self.write({"MissingArgumentError": str(exc)})
@@ -26,7 +33,7 @@ class BaseHandler(RequestHandler):
 
 class MainHandler(RequestHandler):
     """
-    Хендлер для получения списка всех элементов каталога и продуктов
+    Обработчик для получения списка всех элементов каталога и продуктов
 
     """
 
@@ -36,7 +43,7 @@ class MainHandler(RequestHandler):
 
 class GetProductListHandler(RequestHandler):
     """
-    Хендлер для получения списка всех продуктов
+    Обработчик для получения списка всех продуктов
     """
 
     def get(self):
@@ -45,7 +52,7 @@ class GetProductListHandler(RequestHandler):
 
 class CreateProductHandler(BaseHandler):
     """
-    Хендлер для создания продуктов
+    Обработчик для создания продуктов
     """
 
     def post(self) -> None:
@@ -56,7 +63,7 @@ class CreateProductHandler(BaseHandler):
 
 class GetProductHandler(RequestHandler):
     """
-    Хендлер для получения списка продуктов по названию
+    Обработчик для получения списка продуктов по названию
     """
 
     def get(self):
@@ -65,7 +72,7 @@ class GetProductHandler(RequestHandler):
 
 class UpdateProductHandler(BaseHandler):
     """
-    Хендлер для изменения продуктов
+    Обработчик для изменения продуктов
     """
 
     def post(self) -> None:
@@ -78,7 +85,7 @@ class UpdateProductHandler(BaseHandler):
 
 class DeleteProductHandler(BaseHandler):
     """
-    Хендлер для удаления продуктов
+    Обработчик для удаления продуктов
     """
 
     def post(self) -> None:
@@ -88,7 +95,7 @@ class DeleteProductHandler(BaseHandler):
 
 class GetCategoryListHandler(RequestHandler):
     """
-    Хендлер для получения списка всех элементов каталога
+    Обработчик для получения списка всех элементов каталога
     """
 
     def get(self):
@@ -97,18 +104,18 @@ class GetCategoryListHandler(RequestHandler):
 
 class CreateCategoryHandler(BaseHandler):
     """
-    Хендлер для создания элементов каталога
+    Обработчик для создания элементов каталога
     """
 
     def post(self) -> None:
         name = self.get_argument("name")
-        description = self.get_argument("description")
+        description = self.get_argument("description", default=None)
         self.base_request(SyncORM.create_category, name=name, description=description)
 
 
 class GetCategoryHandler(RequestHandler):
     """
-    Хендлер для получения списка элементов каталога по названию
+    Обработчик для получения списка элементов каталога по названию
     """
 
     def get(self):
@@ -117,7 +124,7 @@ class GetCategoryHandler(RequestHandler):
 
 class UpdateCategoryHandler(RequestHandler):
     """
-    Хендлер для изменения элементов каталога
+    Обработчик для изменения элементов каталога
     """
 
     def post(self) -> None:
@@ -126,7 +133,7 @@ class UpdateCategoryHandler(RequestHandler):
 
 class DeleteCategoryHandler(RequestHandler):
     """
-    Хендлер для удаления элементов каталога
+    Обработчик для удаления элементов каталога
     """
 
     def post(self) -> None:

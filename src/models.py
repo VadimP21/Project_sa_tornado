@@ -26,6 +26,7 @@ class ProductOrm(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(
         server_default=text("TIMEZONE('utc',now())"), onupdate=datetime.datetime.utcnow
     )
+    archived: Mapped[bool] = mapped_column(default=False)
 
     categories: Mapped[list["CategoryOrm"]] = relationship(
         secondary="category_product_m2m", back_populates="products"

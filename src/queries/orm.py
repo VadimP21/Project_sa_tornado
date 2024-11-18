@@ -1,8 +1,6 @@
-from sqlalchemy import select, func, cast, Integer, and_
 from sqlalchemy.dialects.mysql import insert
-from sqlalchemy.orm import joinedload, selectinload, contains_eager
-from sqlalchemy.sql.operators import contains
-from tornado import version
+
+from queries.base import ProductQueries, CategoriesQueries
 from src.models import ProductOrm, CategoryOrm, str255
 from database import session_factory, async_session_factory, Base, engine
 
@@ -12,6 +10,7 @@ class AsyncOrm:
 
 
 class SyncORM:
+
     @staticmethod
     def create_tables():
         engine.echo = False
@@ -61,7 +60,7 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str, price: int) -> dict[str : str | int | bool]:
+    def create_product(name: str255, price: int) -> dict[str : str | int | bool]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя продукта
@@ -69,12 +68,11 @@ class SyncORM:
         :return: dict
         """
         with session_factory() as session:
+            product_query = ProductQueries()
             last_version_product_by_name = (
-                session.query(ProductOrm)
-                .filter_by(name=name)
-                .options(joinedload(ProductOrm.categories))
-                .order_by(ProductOrm.version.desc())
-                .first()
+                product_query.last_version_product_by_name_query(
+                    session=session, name=name, model=ProductOrm
+                )
             )
             if last_version_product_by_name:
                 next_version = last_version_product_by_name.version + 1
@@ -88,6 +86,7 @@ class SyncORM:
                 new_product = ProductOrm(name=name, price=price)
                 already_existing = False
             session.add(new_product)
+            session.flush()
             new_product_params = {
                 "already_existing": already_existing,
                 "id": new_product.id,
@@ -99,26 +98,6 @@ class SyncORM:
             return new_product_params
 
     @staticmethod
-    def archive_product(name: str255) -> dict[str : str255 | int]:
-        """
-        Удаляет все версии продукта по имени
-        :param name: Имя продукта
-        :return:
-        """
-        with session_factory() as session:
-            products_versions_to_delete = (
-                session.query(ProductOrm)
-                .filter_by(name=name)
-                .update({ProductOrm.archived: True})
-            )
-            result = {
-                "name": name,
-                "amount_deleted_products": products_versions_to_delete,
-            }
-            session.commit()
-            return result
-
-    @staticmethod
     def upgrade_product(product_id: str, new_name: str255) -> dict[str : str255 | int]:
         """
         Удаляет все версии продукта по имени
@@ -127,18 +106,44 @@ class SyncORM:
         :return: result
         """
         with session_factory() as session:
-            product_name_query = (
-                session.query(ProductOrm).filter_by(id=int(product_id)).first()
+            product_query = ProductQueries()
+
+            first_product_by_name = product_query.first_product_by_name_query(
+                session=session, product_id=int(product_id), model=ProductOrm
             )
+            last_name = first_product_by_name.name
             products_versions_to_upgrade = (
-                session.query(ProductOrm)
-                .filter_by(name=product_name_query.name)
-                .update({ProductOrm.name: new_name})
+                product_query.products_versions_to_upgrade_query(
+                    session=session,
+                    name=last_name,
+                    new_name=new_name,
+                    model=ProductOrm,
+                )
             )
             result = {
-                "id": product_id,
+                "last_name": last_name,
                 "new_name": new_name,
                 "amount_upgraded_products": products_versions_to_upgrade,
+            }
+            session.commit()
+            return result
+
+    @staticmethod
+    def archive_product(name: str255) -> dict[str : str255 | int]:
+        """
+        Удаляет все версии продукта по имени
+        :param name: Имя продукта
+        :return:
+        """
+        with session_factory() as session:
+            product_query = ProductQueries()
+
+            products_by_name_archived = product_query.products_by_name_archived_query(
+                session=session, name=name, model=ProductOrm
+            )
+            result = {
+                "name": name,
+                "amount_archived_products": products_by_name_archived,
             }
             session.commit()
             return result
@@ -154,8 +159,9 @@ class SyncORM:
         :return: dict
         """
         with session_factory() as session:
-            existing_category_by_name = (
-                session.query(CategoryOrm).filter_by(name=name).first()
+            category_query = CategoriesQueries()
+            existing_category_by_name = category_query.existing_category_by_name_query(
+                session=session, name=name, model=CategoryOrm
             )
             if existing_category_by_name:
                 new_category_params = {
@@ -166,11 +172,13 @@ class SyncORM:
                 }
             else:
                 new_category = CategoryOrm(name=name, description=description)
+                session.add(new_category)
+                session.flush()
                 new_category_params = {
                     "already_existing": 0,
                     "id": new_category.id,
                     "name": new_category.name,
                     "description": new_category.description,
                 }
-            session.commit()
+                session.commit()
             return new_category_params

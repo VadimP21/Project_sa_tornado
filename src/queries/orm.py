@@ -61,7 +61,7 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str, price: int) -> dict[str:str | int]:
+    def create_product(name: str, price: int) -> dict[str : str | int | bool]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя продукта
@@ -99,7 +99,27 @@ class SyncORM:
             return new_product_params
 
     @staticmethod
-    def create_category(name: str, description: str | None) -> dict[str:str | int]:
+    def archive_product(name: str) -> dict[str : str | int]:
+        """
+        Удаляет все версии продукта по имени
+        :param name: Имя продукта
+        :return:
+        """
+        with session_factory() as session:
+            products_versions_to_delete = (
+                session.query(ProductOrm)
+                .filter_by(name=name)
+                .update({ProductOrm.archived: True})
+            )
+            result = {
+                "name": name,
+                "amount_deleted_products": products_versions_to_delete,
+            }
+            session.commit()
+            return result
+
+    @staticmethod
+    def create_category(name: str, description: str | None) -> dict[str : str | int]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя категории
@@ -108,9 +128,7 @@ class SyncORM:
         """
         with session_factory() as session:
             existing_category_by_name = (
-                session.query(CategoryOrm)
-                .filter_by(name=name)
-                .first()
+                session.query(CategoryOrm).filter_by(name=name).first()
             )
             print(existing_category_by_name)
             if existing_category_by_name:
@@ -130,8 +148,3 @@ class SyncORM:
                 }
             session.commit()
             return new_category_params
-
-    @staticmethod
-    def delete_product(name: str) -> dict[str:str | int]:
-        with session_factory() as session:
-            pass

@@ -3,7 +3,7 @@ from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import joinedload, selectinload, contains_eager
 from sqlalchemy.sql.operators import contains
 from tornado import version
-from src.models import ProductOrm, CategoryOrm
+from src.models import ProductOrm, CategoryOrm, str255
 from database import session_factory, async_session_factory, Base, engine
 
 
@@ -61,7 +61,7 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str, price: int) -> dict[str : str | int | bool]:
+    def create_product(name: str, price: int) -> dict[str: str | int | bool]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя продукта
@@ -83,10 +83,10 @@ class SyncORM:
                     last_version_product_by_name.categories
                 )
                 new_product.categories.extend(existing_product_categories)
-                already_existing = 1
+                already_existing = True
             else:
                 new_product = ProductOrm(name=name, price=price)
-                already_existing = 0
+                already_existing = False
             session.add(new_product)
             new_product_params = {
                 "already_existing": already_existing,
@@ -99,7 +99,7 @@ class SyncORM:
             return new_product_params
 
     @staticmethod
-    def archive_product(name: str) -> dict[str : str | int]:
+    def archive_product(name: str255) -> dict[str: str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param name: Имя продукта
@@ -119,7 +119,34 @@ class SyncORM:
             return result
 
     @staticmethod
-    def create_category(name: str, description: str | None) -> dict[str : str | int]:
+    def upgrade_product(product_id: str, new_name: str255) -> dict[str: str255 | int]:
+        """
+        Удаляет все версии продукта по имени
+        :param product_id: ID продукта
+        :param new_name: Новое имя продукта
+        :return: result
+        """
+        with session_factory() as session:
+            product_name_query = (
+                session.query(ProductOrm)
+                .filter_by(id=int(product_id))
+                .first()
+            )
+            products_versions_to_upgrade = (
+                session.query(ProductOrm)
+                .filter_by(name=product_name_query.name)
+                .update({ProductOrm.name: new_name})
+            )
+            result = {
+                "id": product_id,
+                "new_name": new_name,
+                "amount_upgraded_products": products_versions_to_upgrade,
+            }
+            session.commit()
+            return result
+
+    @staticmethod
+    def create_category(name: str255, description: str | None) -> dict[str: str255 | int]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя категории
@@ -130,7 +157,6 @@ class SyncORM:
             existing_category_by_name = (
                 session.query(CategoryOrm).filter_by(name=name).first()
             )
-            print(existing_category_by_name)
             if existing_category_by_name:
                 new_category_params = {
                     "already_existing": 1,

@@ -2,9 +2,25 @@
 Хендлеры
 """
 
-from tornado.web import RequestHandler
+from tornado.web import RequestHandler, MissingArgumentError
 from src.queries.orm import SyncORM
 
+
+class BaseHandler(RequestHandler):
+    """
+    Базовый класс для обработки запросов, содержащий общую логику обработки исключений.
+    """
+    def base_request(self, func, *args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            self.set_status(201)
+            self.write(result)
+        except MissingArgumentError as exc:
+            self.set_status(400)
+            self.write({"MissingArgumentError": str(exc)})
+        except Exception as exc:
+            self.set_status(500)
+            self.write({"Unexpected error": str(exc)})
 
 class MainHandler(RequestHandler):
     """
@@ -25,7 +41,7 @@ class GetProductListHandler(RequestHandler):
         pass
 
 
-class CreateProductHandler(RequestHandler):
+class CreateProductHandler(BaseHandler):
     """
     Хендлер для создания продуктов
     """
@@ -33,13 +49,7 @@ class CreateProductHandler(RequestHandler):
     def post(self) -> None:
         name = self.get_argument("name")
         price = self.get_argument("price")
-        try:
-            result = SyncORM.create_product(name=name, price=int(price))
-            self.set_status(201)
-            self.write(result)
-        except Exception as exc:
-            self.set_status(500)
-            self.write({"error": str(exc)})
+        self.base_request(SyncORM.create_product, name=name, price=price)
 
 
 class GetProductHandler(RequestHandler):
@@ -51,29 +61,26 @@ class GetProductHandler(RequestHandler):
         pass
 
 
-class UpdateProductHandler(RequestHandler):
+class UpdateProductHandler(BaseHandler):
     """
     Хендлер для изменения продуктов
     """
 
     def post(self) -> None:
-        pass
+        product_id = self.get_argument("id")
+        new_name = self.get_argument("new_name")
+        self.base_request(SyncORM.upgrade_product, product_id=product_id, new_name=new_name)
 
 
-class DeleteProductHandler(RequestHandler):
+class DeleteProductHandler(BaseHandler):
     """
     Хендлер для удаления продуктов
     """
 
     def post(self) -> None:
         name = self.get_argument("name")
-        try:
-            result = SyncORM.archive_product(name=name)
-            self.set_status(201)
-            self.write(result)
-        except Exception as exc:
-            self.set_status(500)
-            self.write({"error": str(exc)})
+        self.base_request(SyncORM.archive_product, name=name)
+
 
 
 class GetCategoryListHandler(RequestHandler):
@@ -85,7 +92,7 @@ class GetCategoryListHandler(RequestHandler):
         pass
 
 
-class CreateCategoryHandler(RequestHandler):
+class CreateCategoryHandler(BaseHandler):
     """
     Хендлер для создания элементов каталога
     """
@@ -93,13 +100,7 @@ class CreateCategoryHandler(RequestHandler):
     def post(self) -> None:
         name = self.get_argument("name")
         description = self.get_argument("description")
-        try:
-            result = SyncORM.create_category(name=name, description=description)
-            self.set_status(201)
-            self.write(result)
-        except Exception as exc:
-            self.set_status(500)
-            self.write({"error": str(exc)})
+        self.base_request(SyncORM.create_category, name=name, description=description)
 
 
 class GetCategoryHandler(RequestHandler):

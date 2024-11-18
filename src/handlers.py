@@ -34,9 +34,9 @@ class CreateProductHandler(RequestHandler):
         name = self.get_argument("name")
         price = self.get_argument("price")
         try:
-            new_product_params = SyncORM.create_product(name=name, price=int(price))
+            result = SyncORM.create_product(name=name, price=int(price))
             self.set_status(201)
-            self.write(new_product_params)
+            self.write(result)
         except Exception as exc:
             self.set_status(500)
             self.write({"error": str(exc)})
@@ -68,9 +68,9 @@ class DeleteProductHandler(RequestHandler):
     def post(self) -> None:
         name = self.get_argument("name")
         try:
-            deleted_product_params = SyncORM.delete_product(name=name)
+            result = SyncORM.archive_product(name=name)
             self.set_status(201)
-            self.write(deleted_product_params)
+            self.write(result)
         except Exception as exc:
             self.set_status(500)
             self.write({"error": str(exc)})
@@ -94,9 +94,9 @@ class CreateCategoryHandler(RequestHandler):
         name = self.get_argument("name")
         description = self.get_argument("description")
         try:
-            new_product_params = SyncORM.create_category(name=name, description=description)
+            result = SyncORM.create_category(name=name, description=description)
             self.set_status(201)
-            self.write(new_product_params)
+            self.write(result)
         except Exception as exc:
             self.set_status(500)
             self.write({"error": str(exc)})

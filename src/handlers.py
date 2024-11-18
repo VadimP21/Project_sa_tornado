@@ -66,7 +66,14 @@ class DeleteProductHandler(RequestHandler):
     """
 
     def post(self) -> None:
-        pass
+        name = self.get_argument("name")
+        try:
+            deleted_product_params = SyncORM.delete_product(name=name)
+            self.set_status(201)
+            self.write(deleted_product_params)
+        except Exception as exc:
+            self.set_status(500)
+            self.write({"error": str(exc)})
 
 
 class GetCategoryListHandler(RequestHandler):

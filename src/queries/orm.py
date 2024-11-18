@@ -130,3 +130,8 @@ class SyncORM:
                 }
             session.commit()
             return new_category_params
+
+    @staticmethod
+    def delete_product(name: str) -> dict[str:str | int]:
+        with session_factory() as session:
+            pass

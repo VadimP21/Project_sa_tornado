@@ -61,7 +61,7 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str, price: int) -> dict[str: str | int | bool]:
+    def create_product(name: str, price: int) -> dict[str : str | int | bool]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя продукта
@@ -99,7 +99,7 @@ class SyncORM:
             return new_product_params
 
     @staticmethod
-    def archive_product(name: str255) -> dict[str: str255 | int]:
+    def archive_product(name: str255) -> dict[str : str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param name: Имя продукта
@@ -119,7 +119,7 @@ class SyncORM:
             return result
 
     @staticmethod
-    def upgrade_product(product_id: str, new_name: str255) -> dict[str: str255 | int]:
+    def upgrade_product(product_id: str, new_name: str255) -> dict[str : str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param product_id: ID продукта
@@ -128,9 +128,7 @@ class SyncORM:
         """
         with session_factory() as session:
             product_name_query = (
-                session.query(ProductOrm)
-                .filter_by(id=int(product_id))
-                .first()
+                session.query(ProductOrm).filter_by(id=int(product_id)).first()
             )
             products_versions_to_upgrade = (
                 session.query(ProductOrm)
@@ -146,7 +144,9 @@ class SyncORM:
             return result
 
     @staticmethod
-    def create_category(name: str255, description: str | None) -> dict[str: str255 | int]:
+    def create_category(
+        name: str255, description: str | None
+    ) -> dict[str : str255 | int]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя категории

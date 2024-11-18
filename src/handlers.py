@@ -10,6 +10,7 @@ class BaseHandler(RequestHandler):
     """
     Базовый класс для обработки запросов, содержащий общую логику обработки исключений.
     """
+
     def base_request(self, func, *args, **kwargs):
         try:
             result = func(*args, **kwargs)
@@ -21,6 +22,7 @@ class BaseHandler(RequestHandler):
         except Exception as exc:
             self.set_status(500)
             self.write({"Unexpected error": str(exc)})
+
 
 class MainHandler(RequestHandler):
     """
@@ -69,7 +71,9 @@ class UpdateProductHandler(BaseHandler):
     def post(self) -> None:
         product_id = self.get_argument("id")
         new_name = self.get_argument("new_name")
-        self.base_request(SyncORM.upgrade_product, product_id=product_id, new_name=new_name)
+        self.base_request(
+            SyncORM.upgrade_product, product_id=product_id, new_name=new_name
+        )
 
 
 class DeleteProductHandler(BaseHandler):
@@ -80,7 +84,6 @@ class DeleteProductHandler(BaseHandler):
     def post(self) -> None:
         name = self.get_argument("name")
         self.base_request(SyncORM.archive_product, name=name)
-
 
 
 class GetCategoryListHandler(RequestHandler):

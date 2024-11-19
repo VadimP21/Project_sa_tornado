@@ -1,3 +1,5 @@
+from unicodedata import category
+
 from sqlalchemy.orm import joinedload
 
 from database import session_factory
@@ -17,7 +19,7 @@ class ProductQueries:
         )
 
     @staticmethod
-    def first_product_by_name_query(
+    def first_product_by_id_query(
         session: session_factory, product_id: int, model: "ProductOrm"
     ):
         return session.query(model).filter_by(id=int(product_id)).first()
@@ -41,3 +43,36 @@ class CategoriesQueries:
         session: session_factory, name: str, model: "CategoryOrm"
     ):
         return session.query(model).filter_by(name=name).first()
+
+    @staticmethod
+    def category_by_id_query(
+        session: session_factory, category_id: int, model: "CategoryOrm"
+    ):
+        return session.get(model, category_id)
+
+    @staticmethod
+    def category_upgrade_query(
+        session: session_factory,
+        model: "CategoryOrm",
+        category_id: str,
+        new_name: str | None,
+        new_description: str | None,
+    ):
+        if new_name and new_description:
+            return (
+                session.query(model)
+                .filter_by(id=int(category_id))
+                .update({model.name: new_name, model.description: new_description})
+            )
+        elif new_name:
+            return (
+                session.query(model)
+                .filter_by(id=int(category_id))
+                .update({model.name: new_name})
+            )
+        elif new_description:
+            return (
+                session.query(model)
+                .filter_by(id=int(category_id))
+                .update({model.description: new_description})
+            )

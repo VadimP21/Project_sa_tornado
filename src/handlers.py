@@ -122,16 +122,18 @@ class GetCategoryHandler(RequestHandler):
         pass
 
 
-class UpdateCategoryHandler(RequestHandler):
+class UpdateCategoryHandler(BaseHandler):
     """
     Обработчик для изменения элементов каталога
     """
 
     def post(self) -> None:
-        pass
+        name = self.get_argument("name")
+        description = self.get_argument(name="description", default=None)
+        self.base_request(SyncORM.create_category, name=name, description=description)
 
 
-class DeleteCategoryHandler(RequestHandler):
+class DeleteCategoryHandler(BaseHandler):
     """
     Обработчик для удаления элементов каталога
     """

@@ -100,7 +100,7 @@ class SyncORM:
     @staticmethod
     def upgrade_product(product_id: str, new_name: str255) -> dict[str : str255 | int]:
         """
-        Удаляет все версии продукта по имени
+        Обновляет все версии продукта по ID
         :param product_id: ID продукта
         :param new_name: Новое имя продукта
         :return: result
@@ -108,7 +108,7 @@ class SyncORM:
         with session_factory() as session:
             product_query = ProductQueries()
 
-            first_product_by_name = product_query.first_product_by_name_query(
+            first_product_by_name = product_query.first_product_by_id_query(
                 session=session, product_id=int(product_id), model=ProductOrm
             )
             last_name = first_product_by_name.name
@@ -182,3 +182,24 @@ class SyncORM:
                 }
                 session.commit()
             return new_category_params
+
+    @staticmethod
+    def update_category(
+        category_id: str, new_name: str255 | None, new_description: str | None
+    ) -> dict[str : str255 | int]:
+        """
+        Обновляет данные категории продуктов по ID
+        :param category_id: ID категории
+        :param new_name: Новое имя категории
+        :param new_description: Новое описание категории
+        :return: result
+        """
+
+        with session_factory() as session:
+            CategoriesQueries.category_upgrade_query(
+                session=session,
+                model=CategoryOrm,
+                category_id=category_id,
+                new_name=new_name,
+                new_description=new_description,
+            )

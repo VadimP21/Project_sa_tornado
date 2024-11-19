@@ -71,7 +71,7 @@ class SyncORM:
             product_query = ProductQueries()
             last_version_product_by_name = (
                 product_query.last_version_product_by_name_query(
-                    session=session, name=name, model=ProductOrm
+                    session=session, model=ProductOrm, name=name
                 )
             )
             if last_version_product_by_name:
@@ -109,15 +109,15 @@ class SyncORM:
             product_query = ProductQueries()
 
             first_product_by_name = product_query.first_product_by_id_query(
-                session=session, product_id=int(product_id), model=ProductOrm
+                session=session, model=ProductOrm, product_id=int(product_id)
             )
             last_name = first_product_by_name.name
             products_versions_to_upgrade = (
                 product_query.products_versions_to_upgrade_query(
                     session=session,
+                    model=ProductOrm,
                     name=last_name,
                     new_name=new_name,
-                    model=ProductOrm,
                 )
             )
             result = {
@@ -139,7 +139,7 @@ class SyncORM:
             product_query = ProductQueries()
 
             products_by_name_archived = product_query.products_by_name_archived_query(
-                session=session, name=name, model=ProductOrm
+                session=session, model=ProductOrm, name=name
             )
             result = {
                 "name": name,
@@ -161,7 +161,7 @@ class SyncORM:
         with session_factory() as session:
             category_query = CategoriesQueries()
             existing_category_by_name = category_query.existing_category_by_name_query(
-                session=session, name=name, model=CategoryOrm
+                session=session, model=CategoryOrm, name=name
             )
             if existing_category_by_name:
                 new_category_params = {
@@ -196,6 +196,11 @@ class SyncORM:
         """
 
         with session_factory() as session:
+            category_to_upgrade = CategoriesQueries.category_by_id_query(
+                session=session, model=CategoryOrm, category_id=category_id
+            )
+            last_name = category_to_upgrade.name
+            last_description = category_to_upgrade.description
             CategoriesQueries.category_upgrade_query(
                 session=session,
                 model=CategoryOrm,
@@ -203,3 +208,11 @@ class SyncORM:
                 new_name=new_name,
                 new_description=new_description,
             )
+            result = {
+                "last_name": last_name,
+                "new_name": category_to_upgrade.name,
+                "last_description": last_description,
+                "new_description": category_to_upgrade.description,
+            }
+            session.commit()
+            return result

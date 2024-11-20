@@ -1,7 +1,4 @@
-from unicodedata import category
-
 from sqlalchemy.orm import joinedload
-
 from database import session_factory
 
 
@@ -135,3 +132,20 @@ class CategoriesQueries:
             )
         else:
             return
+
+    @staticmethod
+    def category_by_id_archived_query(
+        session: session_factory, model: "CategoryOrm", category_id: str
+    ):
+        """
+        Архивирует категорию по ID
+        :param session: Сессия обращения в БД
+        :param model: CategoryOrm
+        :param category_id: ID продукта
+        :return : инстанс CategoryOrm
+        """
+        return (
+            session.query(model)
+            .filter_by(id=int(category_id))
+            .update({model.archived: True})
+        )

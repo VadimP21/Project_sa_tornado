@@ -216,3 +216,23 @@ class SyncORM:
             }
             session.commit()
             return result
+
+    @staticmethod
+    def archive_category(category_id: str) -> dict[str : str255 | int]:
+        """
+        Удаляет все версии продукта по имени
+        :param category_id: ID категории
+        :return:
+        """
+        with session_factory() as session:
+            category_query = CategoriesQueries()
+
+            category_by_id_archived = category_query.category_by_id_archived_query(
+                session=session, model=CategoryOrm, category_id=category_id
+            )
+            result = {
+                "id": category_id,
+                "amount_archived_products": category_by_id_archived,
+            }
+            session.commit()
+            return result

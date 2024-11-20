@@ -145,4 +145,8 @@ class DeleteCategoryHandler(BaseHandler):
     """
 
     def post(self) -> None:
-        pass
+        category_id = self.get_argument(name="id", default=None)
+        self.base_request(
+            SyncORM.archive_category,
+            category_id=category_id,
+        )

@@ -38,6 +38,7 @@ class CategoryOrm(Base):
     id: Mapped[pk]
     name: Mapped[str255]
     description: Mapped[str255 | None]
+    archived: Mapped[bool] = mapped_column(default=False)
 
     products: Mapped[list["ProductOrm"]] = relationship(
         secondary="category_product_m2m", back_populates="categories"

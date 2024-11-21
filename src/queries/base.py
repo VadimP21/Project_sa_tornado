@@ -1,8 +1,63 @@
+from sqlalchemy import text
 from sqlalchemy.orm import joinedload
 from database import session_factory
 
 
 class ProductQueries:
+    @staticmethod
+    def all_specific_version_products_with_pagination_and_sort_by_field_query(
+        session: session_factory,
+        model: "ProductOrm",
+        sort_direction: str,
+        offset: int,
+        limit: int,
+        product_version: int,
+    ):
+        """
+        Возвращает
+        :param session:
+        :param model:
+        :param sort_direction:
+        :param offset:
+        :param limit:
+        :param product_version:
+        :return:
+        """
+        return (
+            session.query(model)
+            .filter_by(version=product_version)
+            .order_by(text(sort_direction))
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    @staticmethod
+    def last_version_products_with_pagination_and_sort_by_field_query(
+        session: session_factory,
+        model: "ProductOrm",
+        sort_direction: str,
+        offset: int,
+        limit: int,
+    ):
+        subquery = (
+            session.query(
+                ProductOrm.id, func.max(ProductOrm.version).label("max_version")
+            )
+            .group_by(ProductOrm.id)
+            .subquery()
+        )
+
+        products = (
+            session.query(ProductOrm)
+            .join(subquery, ProductOrm.id == subquery.c.id, isouter=True)
+            .filter(ProductOrm.version == subquery.c.max_version)
+            .order_by(sort_direction)
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
     @staticmethod
     def last_version_product_by_name_query(
         session: session_factory, model: "ProductOrm", name: str

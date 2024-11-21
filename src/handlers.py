@@ -41,13 +41,25 @@ class MainHandler(RequestHandler):
         pass
 
 
-class GetProductListHandler(RequestHandler):
+class GetProductListHandler(BaseHandler):
     """
     Обработчик для получения списка всех продуктов
     """
 
     def get(self):
-        pass
+        page_number = self.get_argument("page_number", "1")
+        page_size = self.get_argument("page_size", "20")
+        sort_field = self.get_argument("sort_field", "id")
+        sort_order = self.get_argument("sort_order", "asc")
+        product_version = self.get_argument("product_version", "last")
+        self.base_request(
+            SyncORM.get_product_list,
+            page_number=page_number,
+            page_size=page_size,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            product_version=product_version,
+        )
 
 
 class CreateProductHandler(BaseHandler):

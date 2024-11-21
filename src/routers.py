@@ -13,7 +13,7 @@ def make_app():
         [
             (r"/", MainHandler),
             (r"/product", CreateProductHandler),
-            (r"/product/list", GetProductListHandler),
+            (r"/product-list", GetProductListHandler),
             (r"/product/update", UpdateProductHandler),
             (
                 r"/product/delete",
@@ -21,7 +21,7 @@ def make_app():
             ),
             (r"/product/([^/]+)", GetProductHandler),
             (r"/category", CreateCategoryHandler),
-            (r"/category/list", GetCategoryListHandler),
+            (r"/category-list", GetCategoryListHandler),
             (r"/category/update", UpdateCategoryHandler),
             (r"/category/delete", DeleteCategoryHandler),
             (r"/category/([^/]+)", GetCategoryHandler),

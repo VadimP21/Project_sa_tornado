@@ -1,4 +1,6 @@
+from sqlalchemy import asc, desc
 from sqlalchemy.dialects.mysql import insert
+from sqlalchemy.exc import InvalidRequestError
 
 from queries.base import ProductQueries, CategoriesQueries
 from src.models import ProductOrm, CategoryOrm, str255
@@ -60,7 +62,7 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str255, price: int) -> dict[str : str | int | bool]:
+    def create_product(name: str255, price: int) -> dict[str: str | int | bool]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя продукта
@@ -98,7 +100,87 @@ class SyncORM:
             return new_product_params
 
     @staticmethod
-    def upgrade_product(product_id: str, new_name: str255) -> dict[str : str255 | int]:
+    def get_product_list(
+            page_number: str, page_size: str, sort_field: str, sort_order: str, product_version: str,
+    ) -> dict[str: str255 | int]:
+        """
+        Получает продукты с заданной страницей, размером страницы, полем сортировки и направлением сортировки.
+
+        :param page_number:
+        :param page_size:
+        :param sort_field:
+        :param sort_order:
+        :param product_version:
+        :return:
+        """
+        with session_factory() as session:
+
+            try:
+                page_number = int(page_number)
+                page_size = int(page_size)
+            except ValueError:
+                return {
+                    "ValueError": "Неверные параметры страницы или размера страницы"
+                }, 400
+
+            try:
+                if sort_order.lower() == "asc":
+                    sort_direction = f"(asc({sort_field}))"
+                elif sort_order.lower() == "desc":
+                    sort_direction = f"{sort_field}.desc"
+                    print(sort_direction)
+                else:
+                    return {"ValueError": "Неверное направление сортировки"}, 400
+
+            except (AttributeError, InvalidRequestError) as exp:
+                return {"AttributeError": str(exp)}, 400
+            offset: int = (page_number - 1) * page_size
+            limit: int = page_size
+
+            if product_version == "last":
+                products = ProductQueries.last_version_products_with_pagination_and_sort_by_field_query(
+                    session=session,
+                    model=ProductOrm,
+                    sort_direction=sort_direction,
+                    offset=offset,
+                    limit=limit,
+                )
+            elif int(product_version):
+                products = ProductQueries.all_specific_version_products_with_pagination_and_sort_by_field_query(
+                    session=session,
+                    model=ProductOrm,
+                    sort_direction=sort_direction,
+                    offset=offset,
+                    limit=limit,
+                    product_version=int(product_version)
+                )
+            else:
+                return {
+                    "ValueError": "Неверное указание версии продукта, укажите 'last' или номер в числовом виде"}, 400
+            products_to_result = []
+            for product in products:
+                products_to_result.append({
+                    "id": product.id,
+                    "name": product.name,
+                    "version": product.version,
+                    "created_at": product.created_at,
+                    "updated_at": product.updated_at,
+                    "archived": product.archived
+                })
+            result = {
+                {
+                    "products": products_to_result
+                },
+                {
+                    "total_count": products
+                }
+
+            }
+
+            return result
+
+    @staticmethod
+    def upgrade_product(product_id: str, new_name: str255) -> dict[str: str255 | int]:
         """
         Обновляет все версии продукта по ID
         :param product_id: ID продукта
@@ -129,7 +211,7 @@ class SyncORM:
             return result
 
     @staticmethod
-    def archive_product(name: str255) -> dict[str : str255 | int]:
+    def archive_product(name: str255) -> dict[str: str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param name: Имя продукта
@@ -150,8 +232,8 @@ class SyncORM:
 
     @staticmethod
     def create_category(
-        name: str255, description: str | None
-    ) -> dict[str : str255 | int]:
+            name: str255, description: str | None
+    ) -> dict[str: str255 | int]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя категории
@@ -185,8 +267,8 @@ class SyncORM:
 
     @staticmethod
     def update_category(
-        category_id: str, new_name: str255 | None, new_description: str | None
-    ) -> dict[str : str255 | int]:
+            category_id: str, new_name: str255 | None, new_description: str | None
+    ) -> dict[str: str255 | int]:
         """
         Обновляет данные категории продуктов по ID
         :param category_id: ID категории
@@ -218,7 +300,7 @@ class SyncORM:
             return result
 
     @staticmethod
-    def archive_category(category_id: str) -> dict[str : str255 | int]:
+    def archive_category(category_id: str) -> dict[str: str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param category_id: ID категории

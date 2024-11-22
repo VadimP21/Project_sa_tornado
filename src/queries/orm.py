@@ -122,18 +122,18 @@ class SyncORM:
                 return {
                     "ValueError": "Неверные параметры страницы или размера страницы"
                 }, 400
-
             try:
-                if sort_order.lower() == "asc":
-                    sort_direction = f"(asc({sort_field}))"
-                elif sort_order.lower() == "desc":
-                    sort_direction = f"{sort_field}.desc"
-                    print(sort_direction)
+                if sort_order.lower() == 'asc':
+                    sort_direction = asc(ProductOrm.__table__.c[sort_field])  # Ключевой момент!
+                elif sort_order.lower() == 'desc':
+                    sort_direction = desc(ProductOrm.__table__.c[sort_field])  # Ключевой момент!
                 else:
-                    return {"ValueError": "Неверное направление сортировки"}, 400
+                    return {"error": "Неверное направление сортировки"}, 400
+            except KeyError:
+                return {"error": f"Поле '{sort_field}' не найдено в таблице"}, 400
+            except (AttributeError, InvalidRequestError) as e:
+                return {"error": str(e)}, 400
 
-            except (AttributeError, InvalidRequestError) as exp:
-                return {"AttributeError": str(exp)}, 400
             offset: int = (page_number - 1) * page_size
             limit: int = page_size
 
@@ -163,17 +163,15 @@ class SyncORM:
                     "id": product.id,
                     "name": product.name,
                     "version": product.version,
-                    "created_at": product.created_at,
-                    "updated_at": product.updated_at,
+                    # "created_at": product.created_at,
+                    # "updated_at": product.updated_at,
                     "archived": product.archived
                 })
             result = {
-                {
-                    "products": products_to_result
-                },
-                {
-                    "total_count": products
-                }
+
+                "products": products_to_result,
+
+                "total_count": len(products_to_result)
 
             }
 

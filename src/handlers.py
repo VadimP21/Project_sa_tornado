@@ -26,10 +26,12 @@ class BaseHandler(RequestHandler):
         except MissingArgumentError as exc:
             self.set_status(400)
             self.write({"MissingArgumentError": str(exc)})
+        except TypeError as exc:
+            self.set_status(400)
+            self.write({"TypeError": str(exc)})
         except Exception as exc:
             self.set_status(500)
             self.write({"Unexpected error": str(exc)})
-
 
 class MainHandler(RequestHandler):
     """

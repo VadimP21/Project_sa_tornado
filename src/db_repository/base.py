@@ -1,6 +1,6 @@
 from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
-from database import session_factory
+from settings.database import session_factory
 
 
 class ProductQueries:

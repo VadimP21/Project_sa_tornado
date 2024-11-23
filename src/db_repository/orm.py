@@ -2,9 +2,9 @@ from sqlalchemy import asc, desc
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.exc import InvalidRequestError
 
-from queries.base import ProductQueries, CategoriesQueries
-from src.models import ProductOrm, CategoryOrm, str255
-from database import session_factory, async_session_factory, Base, engine
+from db_repository.base import ProductQueries, CategoriesQueries
+from models.models import ProductOrm, CategoryOrm, str255
+from settings.database import session_factory, Base, engine
 
 
 class AsyncOrm:

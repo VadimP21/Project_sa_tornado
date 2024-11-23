@@ -8,7 +8,7 @@ from typing import Annotated
 from sqlalchemy import text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from settings.database import Base
 
 pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 str255 = Annotated[str, 255]

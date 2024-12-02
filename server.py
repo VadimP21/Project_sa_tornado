@@ -8,9 +8,7 @@ from src.routers import routers
 
 
 def app():
-    return tornado.web.Application(
-        routers
-    )
+    return tornado.web.Application(routers)
 
 
 if __name__ == "__main__":

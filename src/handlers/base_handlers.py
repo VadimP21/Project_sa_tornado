@@ -1,6 +1,7 @@
 """
 Базовые сущности обработчиков
 """
+
 from tornado.web import MissingArgumentError, RequestHandler
 
 
@@ -14,8 +15,6 @@ class BaseHandler(RequestHandler):
             result = func(*args, **kwargs)
             self.set_status(201)
             self.write(result)
-
-
 
         except ValueError as exc:
             self.set_status(400)

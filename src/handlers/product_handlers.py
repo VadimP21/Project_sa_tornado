@@ -1,6 +1,7 @@
 """
 Обработчики запросов по сущности 'Продукт'
 """
+
 from tornado.web import RequestHandler
 
 from handlers.base_handlers import BaseHandler
@@ -12,18 +13,23 @@ from src.db_repository.product_repository import SyncORM, ProductRepository
 
 class ProductHandlers(RequestHandler):
     def post(self) -> None:
-        kwargs = {"name": self.get_argument("name"),
-                  "price": self.get_argument("price")
-                  }
+        kwargs = {
+            "name": self.get_argument("name"),
+            "price": self.get_argument("price"),
+        }
         result = ProductService.post(**kwargs)
-        # self.set_status(result.status_code)
-        # self.write(result.result)
+        self.set_status(result.status_code)
+        self.write(result.result)
+
     def get(self):
         pass
+
     def put(self):
         pass
+
     def delete(self):
         pass
+
 
 class GetProductListHandler(BaseHandler):
     """

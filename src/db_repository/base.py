@@ -41,9 +41,7 @@ class ProductQueries:
         limit: int,
     ):
         subquery = (
-            session.query(
-                model.id, func.max(model.version).label("max_version")
-            )
+            session.query(model.id, func.max(model.version).label("max_version"))
             .group_by(model.id)
             .subquery()
         )
@@ -58,6 +56,7 @@ class ProductQueries:
             .all()
         )
         return products
+
     @staticmethod
     def last_version_product_by_name_query(
         session: session_factory, model: "ProductOrm", name: str

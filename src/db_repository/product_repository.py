@@ -1,14 +1,85 @@
-from sqlalchemy import asc, desc
+"""Модели DTO"""
+from sqlalchemy import asc, desc, select
 from sqlalchemy.dialects.mysql import insert
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError, NoResultFound
 
 from db_repository.base import ProductQueries, CategoriesQueries
 from models.models import ProductOrm, CategoryOrm, str255
+from schemas.product_schemas import ProductPostDTO
 from settings.database import session_factory, Base, engine
 
 
 class AsyncOrm:
     pass
+
+
+class ProductRepository:
+    """
+    Класс-репозиторий для работы с Product.
+    Принимает объекты DTO, организует сессию в БД и возвращает модель БД.
+    Обрабатывает исключения, связанные с БД
+    """
+
+    @staticmethod
+    def last_version_product_repository(product_dto: ProductPostDTO) -> ProductOrm | None:
+        try:
+            with session_factory() as session:
+                result = session.execute(
+                    select(ProductOrm)
+                    .filter_by(name=product_dto.name)
+                    .order_by(ProductOrm.version.desc())
+                    .limit(1)
+                ).scalar_one_or_none()
+            return result
+        except NoResultFound:
+            # Обработка случая, когда запись не найдена
+            print(f"Product with name '{product_dto.name}' not found.")
+            return None
+    @staticmethod
+    def create_product(product: ProductPostDTO) -> dict[str: str | int | bool]:
+        """
+        Добавляет в БД новый продукт или новую версию существующего
+        :param product: имя продукта
+        :return: dict
+        """
+
+        with session_factory() as session:
+            data = product.model_dump()
+            new_task = ProductOrm(**data)
+            session.add(new_task)
+            session.flush()
+            session.commit()
+            return new_task.id
+
+            product_query = ProductQueries()
+            last_version_product_by_name = (
+                product_query.last_version_product_by_name_query(
+                    session=session, model=ProductOrm, name=name
+                )
+            )
+
+            if last_version_product_by_name:
+                next_version = last_version_product_by_name.version + 1
+                new_product = ProductOrm(name=name, price=price, version=next_version)
+                existing_product_categories: list = (
+                    last_version_product_by_name.categories
+                )
+                new_product.categories.extend(existing_product_categories)
+                already_existing = True
+            else:
+                new_product = ProductOrm(name=name, price=price)
+                already_existing = False
+            session.add(new_product)
+            session.flush()
+            new_product_params = {
+                "already_existing": already_existing,
+                "id": new_product.id,
+                "name": new_product.name,
+                "price": new_product.price,
+                "version": new_product.version,
+            }
+            session.commit()
+            return new_product_params
 
 
 class SyncORM:

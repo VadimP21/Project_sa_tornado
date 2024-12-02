@@ -1,8 +1,7 @@
-from pydantic import BaseConfig
+from pydantic_settings import BaseSettings
 
-
-class AppSettings(BaseConfig):
+class AppSettings(BaseSettings):
     pass
 
-class DataBaseSettings(BaseConfig):
+class DataBaseSettings(BaseSettings):
     pass

@@ -5,7 +5,7 @@
 from tornado.web import RequestHandler
 
 from handlers.base_handlers import BaseHandler
-from src.db_repository.orm import SyncORM
+from src.db_repository.product_repository import SyncORM
 
 
 class CreateCategoryHandler(BaseHandler):

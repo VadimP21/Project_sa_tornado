@@ -35,25 +35,21 @@ class ProductRepository:
                 ).scalar_one_or_none()
             return result
         except NoResultFound:
-            # Обработка случая, когда запись не найдена
             print(f"Product with name '{product_dto.name}' not found.")
             return None
 
     @staticmethod
-    def last_version_of_product_repository(product_dto: ProductPostDTO) -> int | None:
-        try:
-            with session_factory() as session:
-                result = session.execute(
-                    select(ProductOrm)
-                    .filter_by(name=product_dto.name)
-                    .order_by(ProductOrm.version.desc())
-                    .limit(1)
-                ).scalar_one_or_none()
-            return result.version
-        except NoResultFound:
-            # Обработка случая, когда запись не найдена
-            print(f"Product with name '{product_dto.name}' not found.")
-            return None
+    def last_version_product_repository(
+        product_dto: ProductPostDTO,
+    ) -> "ProductRepository":
+        with session_factory() as session:
+            result = session.execute(
+                select(ProductOrm)
+                .filter_by(name=product_dto.name)
+                .order_by(ProductOrm.version.desc())
+                .limit(1)
+            ).scalar_one_or_none()
+            return result
 
     @staticmethod
     def create_new_version_of_existing_product(
@@ -62,61 +58,32 @@ class ProductRepository:
         try:
             with session_factory() as session:
                 data = product_dto.model_dump()
-                new_product = ProductOrm(**data)
-                session.add(new_product)
+                new_product_orm = ProductOrm(**data)
+                session.add(new_product_orm)
                 session.flush()
                 session.commit()
-                session.refresh(new_product)
-                return new_product
+                session.refresh(new_product_orm)
+                return new_product_orm
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return None
 
     @staticmethod
-    def create_product(product: ProductPostDTO) -> dict[str : str | int | bool]:
+    def create_product(product: ProductPostDTO) -> "ProductOrm":
         """
-        Добавляет в БД новый продукт или новую версию существующего
-        :param product: имя продукта
-        :return: dict
+        Добавляет в БД новый продукт
+        :param product: модель продукта DTO
+        :return: id
         """
 
         with session_factory() as session:
             data = product.model_dump()
-            new_task = ProductOrm(**data)
-            session.add(new_task)
+            new_product_orm = ProductOrm(**data)
+            session.add(new_product_orm)
             session.flush()
             session.commit()
-            return new_task.id
-
-            product_query = ProductQueries()
-            last_version_product_by_name = (
-                product_query.last_version_product_by_name_query(
-                    session=session, model=ProductOrm, name=name
-                )
-            )
-
-            if last_version_product_by_name:
-                next_version = last_version_product_by_name.version + 1
-                new_product = ProductOrm(name=name, price=price, version=next_version)
-                existing_product_categories: list = (
-                    last_version_product_by_name.categories
-                )
-                new_product.categories.extend(existing_product_categories)
-                already_existing = True
-            else:
-                new_product = ProductOrm(name=name, price=price)
-                already_existing = False
-            session.add(new_product)
-            session.flush()
-            new_product_params = {
-                "already_existing": already_existing,
-                "id": new_product.id,
-                "name": new_product.name,
-                "price": new_product.price,
-                "version": new_product.version,
-            }
-            session.commit()
-            return new_product_params
+            session.refresh(new_product_orm)
+            return new_product_orm
 
 
 class SyncORM:

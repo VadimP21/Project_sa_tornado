@@ -12,7 +12,6 @@ from schemas.product_schemas import (
     ProductResultDTO,
 )
 from schemas.proj_schemas import ResultToWriteDTO, ErrorDTO
-from utils.base import product_orm_to_dto
 
 
 class ProductService:
@@ -23,17 +22,23 @@ class ProductService:
     """
 
     @staticmethod
-    def post(**kwargs):
+    def create(**kwargs):
+        """
+        Метод создает новый продукт,
+        если продукт существует, добавляет его новую версию
+        """
         try:
             product_to_post_dto: "ProductPostDTO" = ProductPostDTO(**kwargs)
         except ValidationError as exc:
             result: "ErrorDTO" = ErrorDTO(error=exc.json(), status_code=400)
             return result
-        last_version_of_product: int | None = (
-            ProductRepository.last_version_of_product_repository(product_to_post_dto)
+
+        last_version_product_orm: "ProductOrm" = (
+            ProductRepository.last_version_product_repository(product_to_post_dto)
         )
-        if last_version_of_product:
-            kwargs["version"] = last_version_of_product + 1
+
+        if last_version_product_orm:
+            kwargs["version"] = last_version_product_orm.version + 1
             product_to_post_dto: ProductWithNewVersionPostDTO = (
                 ProductWithNewVersionPostDTO(**kwargs)
             )
@@ -42,13 +47,25 @@ class ProductService:
                     product_to_post_dto
                 )
             )
-            new_product_dto: "ProductResultDTO" = product_orm_to_dto(
-                product_orm=new_product_orm, model_gto=ProductResultDTO
+            new_product_dto: "ProductResultDTO" = ProductResultDTO.model_validate(
+                new_product_orm
             )
-            result: str = new_product_dto.json()
-            if result:
-                return ResultToWriteDTO(result=result, status_code=201)
+
+            result: str = new_product_dto.model_dump_json()
+            return ResultToWriteDTO(result=result, status_code=201)
+
         else:
-            #  условие, если создаваемого продукта нет
-            #  создать новый продукт v.1
-            pass
+            new_product_orm: "ProductOrm" = ProductRepository.create_product(
+                product_to_post_dto
+            )
+            new_product_dto: "ProductResultDTO" = ProductResultDTO.model_validate(
+                new_product_orm
+            )
+
+            result: str = new_product_dto.model_dump_json()
+            return ResultToWriteDTO(result=result, status_code=201)
+
+    @staticmethod
+    def update(**kwargs):
+        """ """
+        pass

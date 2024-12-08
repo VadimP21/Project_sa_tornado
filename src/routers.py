@@ -6,10 +6,11 @@ from tornado.web import URLSpec
 from handlers.product_handlers import *
 
 routers = [
-    URLSpec(r"/product", ProductHandlers, name="product_post"),  # POST /product
+    URLSpec(r"/product", ProductHandlers, name="product_post"),
+    URLSpec(r"/product/update", ProductHandlers, name="product_update"),
     # (r"/product", CreateProductHandler),
     (r"/product-list", GetProductListHandler),
-    (r"/product/update", UpdateProductHandler),
+    # (r"/product/update", UpdateProductHandler),
     (
         r"/product/delete",
         DeleteProductHandler,

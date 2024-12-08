@@ -1,11 +1,10 @@
-from dataclasses import field
 from datetime import datetime
 
-from black.nodes import first_leaf
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ProductPostDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     name: str
     price: int
 

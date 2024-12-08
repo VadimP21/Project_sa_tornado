@@ -17,7 +17,7 @@ class ProductHandlers(RequestHandler):
             "name": self.get_argument("name"),
             "price": self.get_argument("price"),
         }
-        result = ProductService.post(**kwargs)
+        result = ProductService.create(**kwargs)
         self.set_status(result.status_code)
         self.write(result.result)
 
@@ -25,7 +25,13 @@ class ProductHandlers(RequestHandler):
         pass
 
     def put(self):
-        pass
+        kwargs = {
+            "name": self.get_argument("name"),
+            "price": self.get_argument("price"),
+        }
+        result = ProductService.update(**kwargs)
+        self.set_status(result.status_code)
+        self.write(result.result)
 
     def delete(self):
         pass

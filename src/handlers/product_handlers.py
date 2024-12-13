@@ -5,10 +5,8 @@
 from tornado.web import RequestHandler
 
 from handlers.base_handlers import BaseHandler
-from schemas.product_schemas import ProductPostDTO
-from schemas.proj_schemas import ResultToWriteDTO
 from services.product_service import ProductService
-from src.db_repository.product_repository import SyncORM, ProductRepository
+from src.db_repository.product_repository import SyncORM
 
 
 class ProductHandlers(RequestHandler):
@@ -21,8 +19,15 @@ class ProductHandlers(RequestHandler):
         self.set_status(result.status_code)
         self.write(result.result)
 
-    def get(self):
-        pass
+
+    def get_one(self):
+        kwargs = {
+            "name": self.get_argument("name", None),
+            "id": self.get_argument("id", None),
+        }
+        result = ProductService.read_one(**kwargs)
+        self.set_status(status_code=int(result["status_code"]))
+        self.write(chunk=result["data"])
 
     def put(self):
         kwargs = {
@@ -31,7 +36,7 @@ class ProductHandlers(RequestHandler):
         }
         result = ProductService.update(**kwargs)
         self.set_status(result.status_code)
-        self.write(result.result)
+        self.write(result.data)
 
     def delete(self):
         pass

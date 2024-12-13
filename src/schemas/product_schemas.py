@@ -17,6 +17,12 @@ class ProductResultDTO(ProductPostDTO):
 class ProductWithNewVersionPostDTO(ProductPostDTO):
     version: int
 
+class ProductSearchByIdDTO(BaseModel):
+    id: int
+
+class ProductSearchByNameDTO(BaseModel):
+    name: str
+
 
 class ProductGetDTO(ProductPostDTO):
     id: int

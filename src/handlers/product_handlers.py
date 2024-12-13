@@ -19,7 +19,6 @@ class ProductHandlers(RequestHandler):
         self.set_status(status_code=int(result["status_code"]))
         self.write(chunk=result["data"])
 
-
     def get_one(self):
         kwargs = {
             "name": self.get_argument("name", None),

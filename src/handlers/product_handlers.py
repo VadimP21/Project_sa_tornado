@@ -16,8 +16,8 @@ class ProductHandlers(RequestHandler):
             "price": self.get_argument("price"),
         }
         result = ProductService.create(**kwargs)
-        self.set_status(result.status_code)
-        self.write(result.result)
+        self.set_status(status_code=int(result["status_code"]))
+        self.write(chunk=result["data"])
 
 
     def get_one(self):

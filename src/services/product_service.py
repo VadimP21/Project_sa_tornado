@@ -9,9 +9,9 @@ from models.models import ProductOrm
 from schemas.product_schemas import (
     ProductPostDTO,
     ProductWithNewVersionPostDTO,
-    ProductResultDTO,
+    ProductResultDTO, ProductSearchByIdDTO, ProductSearchByNameDTO,
 )
-from schemas.proj_schemas import ResultToWriteDTO, ErrorDTO
+from schemas.proj_schemas import ErrorDTO, ResponseDTO
 
 
 class ProductService:
@@ -22,19 +22,21 @@ class ProductService:
     """
 
     @staticmethod
-    def create(**kwargs):
+    def create(**kwargs) -> dict[str, str]:
         """
         Метод создает новый продукт,
         если продукт существует, добавляет его новую версию
+        args: kwarg = {"name": ..., "price": ...}
+        return: {data: {created product}, status_code: 201 | 400}
         """
         try:
             product_to_post_dto: "ProductPostDTO" = ProductPostDTO(**kwargs)
         except ValidationError as exc:
-            result: "ErrorDTO" = ErrorDTO(error=exc.json(), status_code=400)
+            result: dict = ResponseDTO[str](data=exc.json(), status_code=400).model_dump()
             return result
 
         last_version_product_orm: "ProductOrm" = (
-            ProductRepository.last_version_product_repository(product_to_post_dto)
+            ProductRepository.last_version_product_by_name_repository(product_to_post_dto)
         )
 
         if last_version_product_orm:
@@ -50,10 +52,6 @@ class ProductService:
             new_product_dto: "ProductResultDTO" = ProductResultDTO.model_validate(
                 new_product_orm
             )
-
-            result: str = new_product_dto.model_dump_json()
-            return ResultToWriteDTO(result=result, status_code=201)
-
         else:
             new_product_orm: "ProductOrm" = ProductRepository.create_product(
                 product_to_post_dto
@@ -61,6 +59,13 @@ class ProductService:
             new_product_dto: "ProductResultDTO" = ProductResultDTO.model_validate(
                 new_product_orm
             )
+        result: dict = ResponseDTO[ProductResultDTO](data=new_product_dto, status_code=201).model_dump()
+        return result
+
+
+
+        result: dict = ResponseDTO[ProductResultDTO](data=new_product_dto, status_code=201).model_dump()
+        return result
 
             result: str = new_product_dto.model_dump_json()
             return ResultToWriteDTO(result=result, status_code=201)

@@ -11,6 +11,7 @@ class ProductPostDTO(BaseModel):
 
 class ProductResultDTO(ProductPostDTO):
     id: int
+    version: int
 
 
 class ProductWithNewVersionPostDTO(ProductPostDTO):

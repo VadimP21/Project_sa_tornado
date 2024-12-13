@@ -3,6 +3,7 @@
 """
 
 import datetime
+from decimal import Decimal
 from typing import Annotated
 
 from sqlalchemy import text, ForeignKey
@@ -20,6 +21,7 @@ class ProductOrm(Base):
     name: Mapped[str255]
     version: Mapped[int] = mapped_column(default=1)
     price: Mapped[int]
+    # price: Mapped[Decimal] = mapped_column()
     created_at: Mapped[datetime.datetime] = mapped_column(
         server_default=text("TIMEZONE('utc',now())")
     )

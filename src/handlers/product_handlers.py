@@ -10,6 +10,17 @@ from src.db_repository.product_repository import SyncORM
 
 
 class ProductHandlers(RequestHandler):
+    def get(self):
+        product_id = self.get_argument("product_id", None)
+        name = self.get_argument("name", None)
+        kwargs = {
+            "name": name,
+            "id": product_id,
+        }
+        result = ProductService.read_one(**kwargs)
+        self.set_status(status_code=int(result["status_code"]))
+        self.write(chunk=result["data"])
+
     def post(self) -> None:
         kwargs = {
             "name": self.get_argument("name"),
@@ -19,14 +30,8 @@ class ProductHandlers(RequestHandler):
         self.set_status(status_code=int(result["status_code"]))
         self.write(chunk=result["data"])
 
-    def get_one(self):
-        kwargs = {
-            "name": self.get_argument("name", None),
-            "id": self.get_argument("id", None),
-        }
-        result = ProductService.read_one(**kwargs)
-        self.set_status(status_code=int(result["status_code"]))
-        self.write(chunk=result["data"])
+    def get_products_list(self):
+        pass
 
     def put(self):
         kwargs = {

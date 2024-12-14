@@ -4,7 +4,7 @@
 
 import tornado
 
-from src.routers import routers, routers_v_2, routers_v_3
+from src.routers import routers
 
 
 def app():

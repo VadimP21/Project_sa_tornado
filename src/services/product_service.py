@@ -73,9 +73,10 @@ class ProductService:
     @staticmethod
     def read_one(**kwargs):
         """Метод для получения продукта по имени(последняя версия) или ID"""
+
         if kwargs["id"] and kwargs["name"]:
             exp_msg = "Insert only ID or only 'name'"
-            result: ResponseDTO = ResponseDTO[str](data=exp_msg, status_code=400)
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
             return result
 
         elif kwargs["id"]:
@@ -84,7 +85,9 @@ class ProductService:
                     **kwargs
                 )
             except ValidationError as exc:
-                result: "ErrorDTO" = ErrorDTO(error=exc.json(), status_code=400)
+                result: dict = ResponseDTO[str](
+                    data=exc.json(), status_code=400
+                ).model_dump()
                 return result
 
             last_version_of_searching_product_orm: "ProductOrm" = (
@@ -92,13 +95,21 @@ class ProductService:
                     product_searching_dto
                 )
             )
+            try:
+                read_one_product_dto: ProductResultDTO = (
+                    ProductResultDTO.model_validate(
+                        last_version_of_searching_product_orm
+                    )
+                )
+            except ValidationError as exc:
+                result: dict = ResponseDTO[str](
+                    data=exc.json(), status_code=400
+                ).model_dump()
+                return result
 
-            read_one_product_dto: ProductResultDTO = ProductResultDTO.model_validate(
-                last_version_of_searching_product_orm
-            )
-            result: ResponseDTO = ResponseDTO[ProductResultDTO](
+            result: dict = ResponseDTO[ProductResultDTO](
                 data=read_one_product_dto, status_code=201
-            )
+            ).model_dump()
             return result
 
         elif kwargs["name"]:
@@ -119,14 +130,14 @@ class ProductService:
             read_one_product_dto: ProductResultDTO = ProductResultDTO.model_validate(
                 last_version_of_searching_product_orm
             )
-            result: ResponseDTO = ResponseDTO[ProductResultDTO](
+            result: dict = ResponseDTO[ProductResultDTO](
                 data=read_one_product_dto, status_code=201
-            )
+            ).model_dump()
             return result
 
         else:
             exp_msg = "Insert ID or 'name'"
-            result: ResponseDTO = ResponseDTO[str](data=exp_msg, status_code=400)
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
             return result
 
     @staticmethod

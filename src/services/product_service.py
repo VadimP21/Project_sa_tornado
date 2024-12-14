@@ -72,7 +72,11 @@ class ProductService:
 
     @staticmethod
     def read_one(**kwargs):
-        """Метод для получения продукта по имени(последняя версия) или ID"""
+        """
+        Метод для получения продукта по имени(последняя версия) или ID
+        args: kwarg = {"name": ..., "price": ...}
+        return: {data: {created product}, status_code: 200 | 400}
+        """
 
         if kwargs["id"] and kwargs["name"]:
             exp_msg = "Insert only ID or only 'name'"
@@ -108,7 +112,7 @@ class ProductService:
                 return result
 
             result: dict = ResponseDTO[ProductResultDTO](
-                data=read_one_product_dto, status_code=201
+                data=read_one_product_dto, status_code=200
             ).model_dump()
             return result
 
@@ -131,7 +135,7 @@ class ProductService:
                 last_version_of_searching_product_orm
             )
             result: dict = ResponseDTO[ProductResultDTO](
-                data=read_one_product_dto, status_code=201
+                data=read_one_product_dto, status_code=200
             ).model_dump()
             return result
 
@@ -142,5 +146,9 @@ class ProductService:
 
     @staticmethod
     def update(**kwargs):
-        """ """
+        """
+        Метод изменяет поля существующего продукта
+        args: kwarg = {"name": ..., "price": ...}
+        return: {data: {created product}, status_code: 200 | 400}
+        """
         pass

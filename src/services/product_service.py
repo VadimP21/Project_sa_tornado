@@ -14,6 +14,7 @@ from schemas.product_schemas import (
     ProductSearchByNameDTO,
 )
 from schemas.proj_schemas import ErrorDTO, ResponseDTO
+from utils.service import get_product_by_one_field
 
 
 class ProductService:
@@ -84,60 +85,20 @@ class ProductService:
             return result
 
         elif kwargs["id"]:
-            try:
-                product_searching_dto: "ProductSearchByIdDTO" = ProductSearchByIdDTO(
-                    **kwargs
-                )
-            except ValidationError as exc:
-                result: dict = ResponseDTO[str](
-                    data=exc.json(), status_code=400
-                ).model_dump()
-                return result
-
-            last_version_of_searching_product_orm: "ProductOrm" = (
-                ProductRepository.last_version_product_by_id_repository(
-                    product_searching_dto
-                )
+            return get_product_by_one_field(
+                insert_dto_model=ProductSearchByIdDTO,
+                repository_func=ProductRepository.last_version_product_by_id_repository,
+                status_code=201,
+                **kwargs
             )
-            try:
-                read_one_product_dto: ProductResultDTO = (
-                    ProductResultDTO.model_validate(
-                        last_version_of_searching_product_orm
-                    )
-                )
-            except ValidationError as exc:
-                result: dict = ResponseDTO[str](
-                    data=exc.json(), status_code=400
-                ).model_dump()
-                return result
-
-            result: dict = ResponseDTO[ProductResultDTO](
-                data=read_one_product_dto, status_code=200
-            ).model_dump()
-            return result
 
         elif kwargs["name"]:
-            try:
-                product_searching_dto: "ProductSearchByNameDTO" = (
-                    ProductSearchByNameDTO(**kwargs)
-                )
-            except ValidationError as exc:
-                result: "ErrorDTO" = ErrorDTO(error=exc.json(), status_code=400)
-                return result
-
-            last_version_of_searching_product_orm: "ProductOrm" = (
-                ProductRepository.last_version_product_by_name_repository(
-                    product_searching_dto
-                )
+            return get_product_by_one_field(
+                insert_dto_model=ProductSearchByNameDTO,
+                repository_func=ProductRepository.last_version_product_by_name_repository,
+                status_code=201,
+                **kwargs
             )
-
-            read_one_product_dto: ProductResultDTO = ProductResultDTO.model_validate(
-                last_version_of_searching_product_orm
-            )
-            result: dict = ResponseDTO[ProductResultDTO](
-                data=read_one_product_dto, status_code=200
-            ).model_dump()
-            return result
 
         else:
             exp_msg = "Insert ID or 'name'"

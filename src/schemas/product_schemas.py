@@ -4,25 +4,48 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ProductPostDTO(BaseModel):
+    """
+    DTO Post query
+    """
     model_config = ConfigDict(from_attributes=True)
     name: str
     price: int
 
 
-class ProductResultDTO(ProductPostDTO):
-    id: int
+class ProductWithNewVersionPostDTO(ProductPostDTO):
+    """
+    DTO for Post query
+    """
     version: int
 
 
-class ProductWithNewVersionPostDTO(ProductPostDTO):
+class ProductResultDTO(ProductPostDTO):
+    """
+    DTO Result for CRUD
+    """
+    id: int
     version: int
 
 
 class ProductSearchByIdDTO(BaseModel):
+    """
+    DTO for Get query
+    """
     id: int
 
 
 class ProductSearchByNameDTO(BaseModel):
+    """
+    DTO for Get query
+    """
+    name: str
+
+
+class ProductUpdateInsertDTO(BaseModel):
+    """
+    DTO Patch query
+    """
+    model_config = ConfigDict(from_attributes=True)
     name: str
 
 

@@ -24,6 +24,10 @@ class ProductRepository:
     def last_version_product_by_name_repository(
         product_dto: "BaseModel",
     ) -> str | None:
+        """
+        Last version of Product by NAME
+        Using in GET, POST
+        """
         with session_factory() as session:
             result = session.execute(
                 select(ProductOrm)
@@ -37,6 +41,10 @@ class ProductRepository:
     def last_version_product_by_id_repository(
             product_dto: "ProductSearchByIdDTO",
     ) -> str | None:
+        """
+        Last version of Product by ID
+        Using in GET
+        """
         with session_factory() as session:
             result = session.execute(
                 select(ProductOrm)
@@ -51,6 +59,10 @@ class ProductRepository:
     def create_new_version_of_existing_product(
         product_dto: "ProductPostDTO",
     ) -> ProductOrm | None:
+        """
+        Create a new version of existing Product
+        Using in POST
+        """
         try:
             with session_factory() as session:
                 data = product_dto.model_dump()
@@ -68,8 +80,9 @@ class ProductRepository:
     def create_product(product: "ProductPostDTO") -> "ProductOrm":
         """
         Добавляет в БД новый продукт
+        Используется в POST
         :param product: модель продукта DTO
-        :return: id
+        :return: "ProductOrm"
         """
 
         with session_factory() as session:

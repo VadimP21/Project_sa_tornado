@@ -23,36 +23,29 @@ class ProductRepository:
     @staticmethod
     def last_version_product_by_name_repository(
         product_dto: "BaseModel",
-    ) -> ProductOrm | None:
-        try:
-            with session_factory() as session:
-                result = session.execute(
-                    select(ProductOrm)
-                    .filter_by(name=product_dto.name)
-                    .order_by(ProductOrm.version.desc())
-                    .limit(1)
-                ).scalar_one_or_none()
-            return result
-        except NoResultFound:
-            print(f"Product with name '{product_dto.name}' not found.")
-            return None
+    ) -> str | None:
+        with session_factory() as session:
+            result = session.execute(
+                select(ProductOrm)
+                .filter_by(name=product_dto.name)
+                .order_by(ProductOrm.version.desc())
+                .limit(1)
+            ).scalar_one_or_none()
+        return result
 
     @staticmethod
     def last_version_product_by_id_repository(
-        product_dto: "ProductSearchByIdDTO",
-    ) -> ProductOrm | None:
-        try:
-            with session_factory() as session:
-                result = session.execute(
-                    select(ProductOrm)
-                    .filter_by(id=product_dto.id)
-                    .order_by(ProductOrm.version.desc())
-                    .limit(1)
-                ).scalar_one_or_none()
-            return result
-        except NoResultFound:
-            print(f"Product with name '{product_dto.name}' not found.")
-            return None
+            product_dto: "ProductSearchByIdDTO",
+    ) -> str | None:
+        with session_factory() as session:
+            result = session.execute(
+                select(ProductOrm)
+                .filter_by(id=product_dto.id)
+                .order_by(ProductOrm.version.desc())
+                .limit(1)
+            ).scalar_one_or_none()
+            print(type(result))
+        return result
 
     @staticmethod
     def create_new_version_of_existing_product(

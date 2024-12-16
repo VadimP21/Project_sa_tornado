@@ -30,17 +30,15 @@ class ProductHandlers(RequestHandler):
         self.set_status(status_code=int(result["status_code"]))
         self.write(chunk=result["data"])
 
-    def get_products_list(self):
-        pass
-
-    def put(self):
+    def patch(self):
         kwargs = {
-            "name": self.get_argument("name"),
+            "id": self.get_argument("product_id", None),
+            "name": self.get_argument("name", None),
             "price": self.get_argument("price"),
         }
         result = ProductService.update(**kwargs)
-        self.set_status(result.status_code)
-        self.write(result.data)
+        self.set_status(status_code=int(result["status_code"]))
+        self.write(chunk=result["data"])
 
     def delete(self):
         pass

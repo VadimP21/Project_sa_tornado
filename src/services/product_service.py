@@ -11,7 +11,8 @@ from schemas.product_schemas import (
     ProductResultDTO,
     ProductWithNewVersionPostDTO,
     ProductSearchByIdDTO,
-    ProductSearchByNameDTO, ProductUpdateByNameInsertDTO,
+    ProductSearchByNameDTO,
+    ProductUpdateByNameInsertDTO,
 )
 from schemas.proj_schemas import ResponseDTO
 from utils.service import get_product_by_one_field, update_product_by_one_field

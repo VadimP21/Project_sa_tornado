@@ -7,6 +7,7 @@ class ProductPostDTO(BaseModel):
     """
     DTO Post query
     """
+
     model_config = ConfigDict(from_attributes=True)
     name: str
     price: int
@@ -16,6 +17,7 @@ class ProductWithNewVersionPostDTO(ProductPostDTO):
     """
     DTO for Post query
     """
+
     version: int
 
 
@@ -23,6 +25,7 @@ class ProductResultDTO(ProductPostDTO):
     """
     DTO Result for CRUD
     """
+
     id: int
     version: int
 
@@ -31,6 +34,7 @@ class ProductSearchByIdDTO(BaseModel):
     """
     DTO for Get query
     """
+
     id: int
 
 
@@ -38,6 +42,7 @@ class ProductSearchByNameDTO(BaseModel):
     """
     DTO for Get query
     """
+
     name: str
 
 
@@ -45,6 +50,7 @@ class ProductUpdateByNameInsertDTO(BaseModel):
     """
     DTO Patch query
     """
+
     model_config = ConfigDict(from_attributes=True)
     name: str
     price: int
@@ -54,6 +60,7 @@ class ProductUpdateByIdInsertDTO(BaseModel):
     """
     DTO Patch query
     """
+
     model_config = ConfigDict(from_attributes=True)
     id: int
     price: int

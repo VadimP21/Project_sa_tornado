@@ -11,8 +11,8 @@ from src.db_repository.product_repository import SyncORM
 
 class ProductHandlers(RequestHandler):
     def get(self):
-        product_id = self.get_argument("product_id", None)
-        name = self.get_argument("name", None)
+        product_id = self.get_query_argument("product_id", None)
+        name = self.get_query_argument("name", None)
         kwargs = {
             "name": name,
             "id": product_id,

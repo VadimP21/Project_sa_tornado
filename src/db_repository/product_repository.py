@@ -22,7 +22,7 @@ class ProductRepository:
 
     @staticmethod
     def last_version_product_by_name_repository(
-        product_dto: "BaseModel",
+            product_dto: "BaseModel",
     ) -> str | None:
         """
         Last version of Product by NAME
@@ -52,12 +52,11 @@ class ProductRepository:
                 .order_by(ProductOrm.version.desc())
                 .limit(1)
             ).scalar_one_or_none()
-            print(type(result))
         return result
 
     @staticmethod
     def create_new_version_of_existing_product(
-        product_dto: "ProductPostDTO",
+            product_dto: "ProductPostDTO",
     ) -> ProductOrm | None:
         """
         Create a new version of existing Product
@@ -93,6 +92,26 @@ class ProductRepository:
             session.commit()
             session.refresh(new_product_orm)
             return new_product_orm
+
+    @staticmethod
+    def update_last_version_of_existing_product_by_id_repository(
+            product_to_update_dto: str, product_with_new_price_dto: str
+    ) -> ProductOrm | None:
+        """
+        Create a new version of existing Product
+        Using in PATCH
+        """
+        with session_factory() as session:
+            product_to_update_data = product_to_update_dto.model_dump()
+            product_with_new_price_data = product_with_new_price_dto.model_dump()
+
+            product_to_update_orm = session.get(ProductOrm, product_to_update_data["id"])
+            product_to_update_orm.price = product_with_new_price_data["price"]
+            # session.add(new_product_orm)
+            session.flush()
+            session.commit()
+            session.refresh(product_to_update_orm)
+        return product_to_update_orm
 
 
 class SyncORM:
@@ -146,7 +165,7 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def create_product(name: str255, price: int) -> dict[str : str | int | bool]:
+    def create_product(name: str255, price: int) -> dict[str: str | int | bool]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя продукта
@@ -185,12 +204,12 @@ class SyncORM:
 
     @staticmethod
     def get_product_list(
-        page_number: str,
-        page_size: str,
-        sort_field: str,
-        sort_order: str,
-        product_version: str,
-    ) -> dict[str : str255 | int]:
+            page_number: str,
+            page_size: str,
+            sort_field: str,
+            sort_order: str,
+            product_version: str,
+    ) -> dict[str: str255 | int]:
         """
         Получает продукты с заданной страницей, размером страницы, полем сортировки и направлением сортировки.
 
@@ -270,7 +289,7 @@ class SyncORM:
             return result
 
     @staticmethod
-    def upgrade_product(product_id: str, new_name: str255) -> dict[str : str255 | int]:
+    def upgrade_product(product_id: str, new_name: str255) -> dict[str: str255 | int]:
         """
         Обновляет все версии продукта по ID
         :param product_id: ID продукта
@@ -301,7 +320,7 @@ class SyncORM:
             return result
 
     @staticmethod
-    def archive_product(name: str255) -> dict[str : str255 | int]:
+    def archive_product(name: str255) -> dict[str: str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param name: Имя продукта
@@ -322,8 +341,8 @@ class SyncORM:
 
     @staticmethod
     def create_category(
-        name: str255, description: str | None
-    ) -> dict[str : str255 | int]:
+            name: str255, description: str | None
+    ) -> dict[str: str255 | int]:
         """
         Добавляет в БД новый продукт или новую версию существующего
         :param name: имя категории
@@ -357,8 +376,8 @@ class SyncORM:
 
     @staticmethod
     def update_category(
-        category_id: str, new_name: str255 | None, new_description: str | None
-    ) -> dict[str : str255 | int]:
+            category_id: str, new_name: str255 | None, new_description: str | None
+    ) -> dict[str: str255 | int]:
         """
         Обновляет данные категории продуктов по ID
         :param category_id: ID категории
@@ -390,7 +409,7 @@ class SyncORM:
             return result
 
     @staticmethod
-    def archive_category(category_id: str) -> dict[str : str255 | int]:
+    def archive_category(category_id: str) -> dict[str: str255 | int]:
         """
         Удаляет все версии продукта по имени
         :param category_id: ID категории

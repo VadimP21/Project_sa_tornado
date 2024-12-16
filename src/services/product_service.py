@@ -8,13 +8,13 @@ from db_repository.product_repository import ProductRepository
 from models.models import ProductOrm
 from schemas.product_schemas import (
     ProductPostDTO,
-    ProductWithNewVersionPostDTO,
     ProductResultDTO,
+    ProductWithNewVersionPostDTO,
     ProductSearchByIdDTO,
-    ProductSearchByNameDTO,
+    ProductSearchByNameDTO, ProductUpdateByNameInsertDTO,
 )
-from schemas.proj_schemas import ErrorDTO, ResponseDTO
-from utils.service import get_product_by_one_field
+from schemas.proj_schemas import ResponseDTO
+from utils.service import get_product_by_one_field, update_product_by_one_field
 
 
 class ProductService:
@@ -40,7 +40,7 @@ class ProductService:
             ).model_dump()
             return result
 
-        last_version_product_orm: "ProductOrm" = (
+        last_version_product_orm: str | None = (
             ProductRepository.last_version_product_by_name_repository(
                 product_to_post_dto
             )
@@ -72,7 +72,7 @@ class ProductService:
         return result
 
     @staticmethod
-    def read_one(**kwargs):
+    def read_one(**kwargs) -> dict[str, str]:
         """
         Метод для получения продукта по имени(последняя версия) или ID
         args: kwarg = {"name": ..., "price": ...}
@@ -106,10 +106,27 @@ class ProductService:
             return result
 
     @staticmethod
-    def update(**kwargs):
+    def update(**kwargs) -> dict[str, str]:
         """
         Метод изменяет поля существующего продукта
         args: kwarg = {"name": ..., "price": ...}
         return: {data: {created product}, status_code: 200 | 400}
         """
-        pass
+        if kwargs["id"] and kwargs["name"]:
+            exp_msg = "Insert only ID or only 'name' for product updating"
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
+            return result
+
+        elif not kwargs["price"]:
+            exp_msg = "Insert new price for product updating"
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
+            return result
+
+        elif kwargs["name"] and kwargs["price"]:
+            update_product_by_one_field(
+                insert_dto_model=ProductUpdateByNameInsertDTO,
+                repository_func=ProductRepository.last_version_product_by_name_repository,
+                **kwargs
+            )
+        elif kwargs["id"] and kwargs["price"]:
+            pass

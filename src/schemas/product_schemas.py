@@ -41,12 +41,26 @@ class ProductSearchByNameDTO(BaseModel):
     name: str
 
 
-class ProductUpdateInsertDTO(BaseModel):
+class ProductUpdateByNameInsertDTO(BaseModel):
     """
     DTO Patch query
     """
     model_config = ConfigDict(from_attributes=True)
     name: str
+    price: int
+
+
+class ProductUpdateByIdInsertDTO(BaseModel):
+    """
+    DTO Patch query
+    """
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    price: int
+
+
+class ProductToUpdateDTO(ProductSearchByIdDTO):
+    pass
 
 
 class ProductGetDTO(ProductPostDTO):

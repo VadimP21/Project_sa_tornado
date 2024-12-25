@@ -67,7 +67,7 @@ class ProductUpdateByIdInsertDTO(BaseModel):
 
 
 class ProductToUpdateDTO(ProductSearchByIdDTO):
-    pass
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProductGetDTO(ProductPostDTO):

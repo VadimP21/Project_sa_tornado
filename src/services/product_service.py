@@ -13,9 +13,14 @@ from schemas.product_schemas import (
     ProductSearchByIdDTO,
     ProductSearchByNameDTO,
     ProductUpdateByNameInsertDTO,
+    ProductUpdateByIdInsertDTO,
 )
 from schemas.proj_schemas import ResponseDTO
 from utils.service import get_product_by_one_field, update_product_by_one_field
+from utils.service import (
+    get_product_by_one_field,
+    update_product_by_one_field,
+)
 
 
 class ProductService:
@@ -76,7 +81,7 @@ class ProductService:
     def read_one(**kwargs) -> dict[str, str]:
         """
         Метод для получения продукта по имени(последняя версия) или ID
-        args: kwarg = {"name": ..., "price": ...}
+        args: kwarg = {"name"("id"): ..., "price": ...}
         return: {data: {created product}, status_code: 200 | 400}
         """
 
@@ -88,7 +93,7 @@ class ProductService:
         elif kwargs["id"]:
             return get_product_by_one_field(
                 insert_dto_model=ProductSearchByIdDTO,
-                repository_func=ProductRepository.last_version_product_by_id_repository,
+                repository_find_func=ProductRepository.last_version_product_by_id_repository,
                 status_code=201,
                 **kwargs
             )
@@ -96,7 +101,7 @@ class ProductService:
         elif kwargs["name"]:
             return get_product_by_one_field(
                 insert_dto_model=ProductSearchByNameDTO,
-                repository_func=ProductRepository.last_version_product_by_name_repository,
+                repository_find_func=ProductRepository.last_version_product_by_name_repository,
                 status_code=201,
                 **kwargs
             )
@@ -125,6 +130,24 @@ class ProductService:
 
         elif kwargs["name"] and kwargs["price"]:
             update_product_by_one_field(
+        elif (kwargs["name"] and kwargs["price"]) and not kwargs["id"]:
+            return update_product_by_one_field(
+                insert_dto_model=ProductUpdateByNameInsertDTO,
+                repository_find_func=ProductRepository.last_version_product_by_name_repository,
+                **kwargs
+            )
+        elif kwargs["id"] and kwargs["price"] and not kwargs["name"]:
+            print("id price")
+
+            return update_product_by_one_field(
+                insert_dto_model=ProductUpdateByIdInsertDTO,
+                repository_find_func=ProductRepository.last_version_product_by_id_repository,
+                **kwargs
+            )
+        else:
+            exp_msg = "Insert ID or 'name' and 'price'"
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
+            return result
                 insert_dto_model=ProductUpdateByNameInsertDTO,
                 repository_func=ProductRepository.last_version_product_by_name_repository,
                 **kwargs

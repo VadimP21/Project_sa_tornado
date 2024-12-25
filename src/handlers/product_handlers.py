@@ -10,7 +10,13 @@ from src.db_repository.product_repository import SyncORM
 
 
 class ProductHandlers(RequestHandler):
+    """
+    Класс-обработчик CRUD для сущности Продукт
+    """
     def get(self):
+        """
+        Функция получения последней версии продукта по ID или имени
+        """
         product_id = self.get_query_argument("product_id", None)
         name = self.get_query_argument("name", None)
         kwargs = {
@@ -22,6 +28,9 @@ class ProductHandlers(RequestHandler):
         self.write(chunk=result["data"])
 
     def post(self) -> None:
+        """
+        Функция создания нового продукта или последней версии нового продукта
+        """
         kwargs = {
             "name": self.get_argument("name"),
             "price": self.get_argument("price"),
@@ -31,6 +40,9 @@ class ProductHandlers(RequestHandler):
         self.write(chunk=result["data"])
 
     def patch(self):
+        """
+        Функция изменения стоимости продукта по ID или имени
+        """
         kwargs = {
             "id": self.get_argument("product_id", None),
             "name": self.get_argument("name", None),

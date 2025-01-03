@@ -2,7 +2,7 @@
 
 from sqlalchemy import asc, desc, select, update
 from sqlalchemy.dialects.mysql import insert
-from sqlalchemy.exc import InvalidRequestError, NoResultFound
+from sqlalchemy.exc import InvalidRequestError
 
 from db_repository.base import ProductQueries, CategoriesQueries
 from models.models import ProductOrm, CategoryOrm, str255
@@ -31,6 +31,7 @@ class ProductRepository:
         with session_factory() as session:
             result = session.execute(
                 select(ProductOrm)
+                # .where(ProductOrm.archived.in_([None, False,]))
                 .filter_by(name=product_dto.name)
                 .order_by(ProductOrm.version.desc())
                 .limit(1)
@@ -134,7 +135,9 @@ class ProductRepository:
         return result
 
     @staticmethod
-    def archive_all_product_in_list_by_name(searching_product_dto: 'BaseModel') -> None:
+    def archive_all_product_in_list_by_name(
+        product_to_archived_dto: "BaseModel",
+    ) -> None:
         """
         Archive all versions od product by name
         Using in DELETE
@@ -144,7 +147,7 @@ class ProductRepository:
             try:
                 stmt = (
                     update(ProductOrm).where(
-                        ProductOrm.name == searching_product_dto.name
+                        ProductOrm.name == product_to_archived_dto.name
                     )
                     # .where(ProductOrm.id.in_(product_ids))
                     .values(archived=True)
@@ -153,26 +156,30 @@ class ProductRepository:
                 session.commit()
             except Exception as e:
                 session.rollback()
-                print(f"Ошибка обновления продуктов: {e}")
+                print(f"Ошибка удаления продуктов: {e}")
 
     @staticmethod
     def archive_product_by_id_repository(
         product_to_archived_dto: "BaseModel",
-    ) -> str | None:
+    ) -> None:
         """
         Archive Product by ID
         Using in DELETE
         """
         with session_factory() as session:
-            product_to_archived_data = product_to_archived_dto.model_dump()
-            product_to_archived_orm = session.get(
-                ProductOrm, product_to_archived_data["id"]
-            )
-            product_to_archived_orm.archived = True
-            session.flush()
-            session.commit()
-            session.refresh(product_to_archived_orm)
-        return product_to_archived_orm
+            try:
+                stmt = (
+                    update(ProductOrm).where(
+                        ProductOrm.id == product_to_archived_dto.id
+                    )
+                    # .where(ProductOrm.id.in_(product_ids))
+                    .values(archived=True)
+                )
+                session.execute(stmt)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Ошибка удаления продукта: {e}")
 
 
 class SyncORM:

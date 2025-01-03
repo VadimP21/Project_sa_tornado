@@ -14,12 +14,15 @@ from schemas.product_schemas import (
     ProductSearchByNameDTO,
     ProductUpdateByNameInsertDTO,
     ProductUpdateByIdInsertDTO,
+    ProductArchivedByIdInsertDTO,
+    ProductArchivedByNameInsertDTO,
 )
 from schemas.proj_schemas import ResponseDTO
-from utils.service import get_product_by_one_field, update_product_by_one_field
 from utils.service import (
     get_product_by_one_field,
     update_product_by_one_field,
+    archive_product_by_name,
+    archive_product_by_id,
 )
 
 
@@ -128,8 +131,6 @@ class ProductService:
             result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
             return result
 
-        elif kwargs["name"] and kwargs["price"]:
-            update_product_by_one_field(
         elif (kwargs["name"] and kwargs["price"]) and not kwargs["id"]:
             return update_product_by_one_field(
                 insert_dto_model=ProductUpdateByNameInsertDTO,
@@ -137,7 +138,6 @@ class ProductService:
                 **kwargs
             )
         elif kwargs["id"] and kwargs["price"] and not kwargs["name"]:
-            print("id price")
 
             return update_product_by_one_field(
                 insert_dto_model=ProductUpdateByIdInsertDTO,
@@ -148,9 +148,33 @@ class ProductService:
             exp_msg = "Insert ID or 'name' and 'price'"
             result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
             return result
-                insert_dto_model=ProductUpdateByNameInsertDTO,
-                repository_func=ProductRepository.last_version_product_by_name_repository,
+
+    @staticmethod
+    def archive(**kwargs) -> dict[str, str]:
+        """
+        Метод архивирует все версии продукта по имени или ID
+        args: kwarg = {"name"("id"): ..., }
+        return: {data: {archived product}, status_code: 200 | 400}
+        """
+        if kwargs["id"] and kwargs["name"]:
+            exp_msg = "Insert only ID or only 'name' for product archive"
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
+            return result
+        elif kwargs["id"] and not kwargs["name"]:
+
+            return archive_product_by_id(
+                insert_dto_model=ProductArchivedByIdInsertDTO,
+                repository_find_func=ProductRepository.last_version_product_by_id_repository,
                 **kwargs
             )
-        elif kwargs["id"] and kwargs["price"]:
-            pass
+        elif kwargs["name"] and not kwargs["id"]:
+
+            return archive_product_by_name(
+                insert_dto_model=ProductArchivedByNameInsertDTO,
+                repository_find_func=ProductRepository.last_version_product_by_name_repository,
+                **kwargs
+            )
+        else:
+            exp_msg = "Insert ID or 'name' for archive product"
+            result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
+            return result

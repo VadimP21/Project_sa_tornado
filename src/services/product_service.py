@@ -96,7 +96,7 @@ class ProductService:
         elif kwargs["id"]:
             return get_product_by_one_field(
                 insert_dto_model=ProductSearchByIdDTO,
-                repository_find_func=ProductRepository.last_version_product_by_id_repository,
+                repository_find_func=ProductRepository.get_product_by_id_repository,
                 status_code=201,
                 **kwargs
             )
@@ -141,7 +141,7 @@ class ProductService:
 
             return update_product_by_one_field(
                 insert_dto_model=ProductUpdateByIdInsertDTO,
-                repository_find_func=ProductRepository.last_version_product_by_id_repository,
+                repository_find_func=ProductRepository.get_product_by_id_repository,
                 **kwargs
             )
         else:
@@ -163,16 +163,12 @@ class ProductService:
         elif kwargs["id"] and not kwargs["name"]:
 
             return archive_product_by_id(
-                insert_dto_model=ProductArchivedByIdInsertDTO,
-                repository_find_func=ProductRepository.last_version_product_by_id_repository,
-                **kwargs
+                insert_dto_model=ProductArchivedByIdInsertDTO, **kwargs
             )
         elif kwargs["name"] and not kwargs["id"]:
 
             return archive_product_by_name(
-                insert_dto_model=ProductArchivedByNameInsertDTO,
-                repository_find_func=ProductRepository.last_version_product_by_name_repository,
-                **kwargs
+                insert_dto_model=ProductArchivedByNameInsertDTO, **kwargs
             )
         else:
             exp_msg = "Insert ID or 'name' for archive product"

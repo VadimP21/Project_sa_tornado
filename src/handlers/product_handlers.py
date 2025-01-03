@@ -13,6 +13,7 @@ class ProductHandlers(RequestHandler):
     """
     Класс-обработчик CRUD для сущности Продукт
     """
+
     def get(self):
         """
         Функция получения последней версии продукта по ID или имени
@@ -53,7 +54,17 @@ class ProductHandlers(RequestHandler):
         self.write(chunk=result["data"])
 
     def delete(self):
-        pass
+        """
+        Функция софт-удаления продукта по ID или имени
+        """
+        print("delete")
+        kwargs = {
+            "id": self.get_argument("product_id", None),
+            "name": self.get_argument("name", None),
+        }
+        result = ProductService.archive(**kwargs)
+        self.set_status(status_code=int(result["status_code"]))
+        self.write(chunk=result["data"])
 
 
 class GetProductListHandler(BaseHandler):

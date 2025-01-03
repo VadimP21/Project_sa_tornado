@@ -1,5 +1,4 @@
 from json import dumps
-from marshal import loads
 
 from pydantic import ValidationError
 
@@ -8,9 +7,6 @@ from models.models import ProductOrm
 from schemas.product_schemas import (
     ProductResultDTO,
     ProductToUpdateDTO,
-    ProductToArchiveDTO,
-    ProductSearchByIdDTO,
-    ProductUpdateByNameInsertDTO,
 )
 from schemas.proj_schemas import ResponseDTO
 
@@ -99,14 +95,11 @@ def update_product_by_one_field(
     return result
 
 
-def archive_product_by_id(
-    insert_dto_model, repository_find_func, status_code: int = 201, **kwargs
-):
+def archive_product_by_id(insert_dto_model, status_code: int = 201, **kwargs):
     """
     Функция архивирует существующий продукт
     Args:
         insert_dto_model: модель DTO для валидации входных данных
-        repository_find_func: функция репозиторий для поиска продукта в БД по идентификатору
         status_code: успешный статус код, по-дефолту 201
         **kwargs: входные данные идентификации
     return:
@@ -117,26 +110,26 @@ def archive_product_by_id(
     try:
         product_searching_dto = insert_dto_model(
             **kwargs
-        )  ### ProductUpdateByNameInsertDTO, ProductUpdateByIdInsertDTO
-        print(product_searching_dto)
+        )
     except ValidationError as exc:
         result_validation_error: dict = ResponseDTO[str](
             data=exc.json(), status_code=400
         ).model_dump()
         return result_validation_error
 
-        # DTO(id=3)
-    archived_product_by_id_orm: str | None = (
-        ProductRepository.archive_product_by_id_repository(
-            product_to_archived_dto=product_searching_dto
-        )
+    ProductRepository.archive_product_by_id_repository(
+        product_to_archived_dto=product_searching_dto
     )
 
-    result_product_dto: "ProductResultDTO" = ProductResultDTO.model_validate(
-        archived_product_by_id_orm
+    archived_product_orm = ProductRepository.get_product_by_id_repository(
+        product_searching_dto
+    )
+
+    archived_product_dto: "ProductResultDTO" = ProductResultDTO.model_validate(
+        archived_product_orm
     )
     result: dict = ResponseDTO[ProductResultDTO](
-        data=result_product_dto, status_code=status_code
+        data=archived_product_dto, status_code=status_code
     ).model_dump()
     return result
 

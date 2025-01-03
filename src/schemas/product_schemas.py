@@ -28,6 +28,7 @@ class ProductResultDTO(ProductPostDTO):
 
     id: int
     version: int
+    archived: bool | None
 
 
 class ProductSearchByIdDTO(BaseModel):

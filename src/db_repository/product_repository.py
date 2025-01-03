@@ -1,6 +1,6 @@
 """Модели DTO"""
 
-from sqlalchemy import asc, desc, select
+from sqlalchemy import asc, desc, select, update
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.exc import InvalidRequestError, NoResultFound
 
@@ -78,7 +78,7 @@ class ProductRepository:
     @staticmethod
     def create_product(product: "ProductPostDTO") -> "ProductOrm":
         """
-        Добавляет в БД новый продукт
+        Добавляет в БД новый продукт.
         Используется в POST
         :param product: модель продукта DTO
         :return: "ProductOrm"
@@ -109,11 +109,69 @@ class ProductRepository:
                 ProductOrm, product_to_update_data["id"]
             )
             product_to_update_orm.price = product_with_new_price_data["price"]
-            # session.add(new_product_orm)
             session.flush()
             session.commit()
             session.refresh(product_to_update_orm)
         return product_to_update_orm
+
+    @staticmethod
+    def get_all_versions_of_products_by_name(
+        product_to_archive_dto: str,
+    ) -> list["ProductOrm"] | None:
+        """
+        Get all versions of existing Product
+        Using in DELETE
+        """
+        with session_factory() as session:
+            result = (
+                session.execute(
+                    select(ProductOrm).filter_by(name=product_to_archive_dto.name)
+                )
+                .scalars()
+                .all()
+            )
+        return result
+
+    @staticmethod
+    def archive_all_product_in_list_by_name(searching_product_dto: 'BaseModel') -> None:
+        """
+        Archive all versions od product by name
+        Using in DELETE
+        """
+
+        with session_factory() as session:
+            try:
+                stmt = (
+                    update(ProductOrm).where(
+                        ProductOrm.name == searching_product_dto.name
+                    )
+                    # .where(ProductOrm.id.in_(product_ids))
+                    .values(archived=True)
+                )
+                session.execute(stmt)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Ошибка обновления продуктов: {e}")
+
+    @staticmethod
+    def archive_product_by_id_repository(
+        product_to_archived_dto: "BaseModel",
+    ) -> str | None:
+        """
+        Archive Product by ID
+        Using in DELETE
+        """
+        with session_factory() as session:
+            product_to_archived_data = product_to_archived_dto.model_dump()
+            product_to_archived_orm = session.get(
+                ProductOrm, product_to_archived_data["id"]
+            )
+            product_to_archived_orm.archived = True
+            session.flush()
+            session.commit()
+            session.refresh(product_to_archived_orm)
+        return product_to_archived_orm
 
 
 class SyncORM:

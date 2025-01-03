@@ -38,20 +38,21 @@ class ProductRepository:
         return result
 
     @staticmethod
-    def last_version_product_by_id_repository(
+    def get_product_by_id_repository(
         product_dto: "ProductSearchByIdDTO",
     ) -> str | None:
         """
         Last version of Product by ID
-        Using in GET
+        Using in GET, UPDATE, DELETE
         """
         with session_factory() as session:
-            result = session.execute(
-                select(ProductOrm)
-                .filter_by(id=product_dto.id)
-                .order_by(ProductOrm.version.desc())
-                .limit(1)
-            ).scalar_one_or_none()
+            try:
+                result = session.execute(
+                    select(ProductOrm).filter_by(id=product_dto.id)
+                ).scalar_one_or_none()
+            except Exception as e:
+                session.rollback()
+                print(f"Ошибка получения продукта: {e}")
         return result
 
     @staticmethod

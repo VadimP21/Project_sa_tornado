@@ -35,6 +35,7 @@ class ProductSearchByIdDTO(BaseModel):
     DTO for Get query
     """
 
+    model_config = ConfigDict(from_attributes=True)
     id: int
 
 
@@ -67,6 +68,36 @@ class ProductUpdateByIdInsertDTO(BaseModel):
 
 
 class ProductToUpdateDTO(ProductSearchByIdDTO):
+    """
+    DTO Patch query
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductArchivedByIdInsertDTO(BaseModel):
+    """
+    DTO Delete query
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
+class ProductArchivedByNameInsertDTO(BaseModel):
+    """
+    DTO Patch query
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+    name: str
+
+
+class ProductToArchiveDTO(ProductSearchByNameDTO):
+    """
+    DTO Patch query
+    """
+
     model_config = ConfigDict(from_attributes=True)
 
 

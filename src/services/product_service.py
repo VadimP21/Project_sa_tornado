@@ -174,3 +174,18 @@ class ProductService:
             exp_msg = "Insert ID or 'name' for archive product"
             result: dict = ResponseDTO[str](data=exp_msg, status_code=400).model_dump()
             return result
+
+    @staticmethod
+    def read_list(**kwargs) -> dict[str, str]:
+        """
+        Метод для получения списка продуктов
+        args: kwargs = {
+            'page_number': page_number,
+            'page_size': page_size,
+            'sort_field': sort_field,
+            'sort_order': sort_order,
+            'product_version': product_version,
+        }
+        return: {data: [{created product}, ...], status_code: 200 | 400}
+        """
+        pass

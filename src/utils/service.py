@@ -80,7 +80,7 @@ def update_product_by_one_field(
         return result_not_found_error
     product_to_update_dto: "ProductToUpdateDTO" = ProductToUpdateDTO.model_validate(
         searching_product_orm
-    )  ### DTO id
+    )
 
     updated_product_orm: "ProductOrm" = (
         ProductRepository.update_last_version_of_existing_product_by_id_repository(
@@ -108,9 +108,7 @@ def archive_product_by_id(insert_dto_model, status_code: int = 201, **kwargs):
         result: dict, ResponseDTO[ProductResultDTO] успешный ответ
     """
     try:
-        product_searching_dto = insert_dto_model(
-            **kwargs
-        )
+        product_searching_dto = insert_dto_model(**kwargs)
     except ValidationError as exc:
         result_validation_error: dict = ResponseDTO[str](
             data=exc.json(), status_code=400
